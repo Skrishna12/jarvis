@@ -1,0 +1,4 @@
+{
+  "name": "Jarvis",
+  "install": "bash .cursor/install.sh"
+}
