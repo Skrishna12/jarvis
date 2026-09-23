@@ -1,8 +1,9 @@
 # Jarvis
 
-Personal CLI assistant. This repository is in **Milestone 2 (database + memory)** —
-SQLite persistence for categorized facts and conversation turns. There is no
-chat loop, agents, or LLM calls yet.
+Personal CLI assistant. This repository is in **Milestone 3 (LLM providers)** —
+a vendor-neutral interface (`generate`, `stream`, `classify`) with a fake
+provider for tests and an OpenAI-compatible HTTP adapter. There is no agent
+routing or chat loop yet.
 
 ## Requirements
 
@@ -19,11 +20,10 @@ pip install -e ".[dev]"
 cp .env.example .env
 ```
 
-`.env` is gitignored. Leave `JARVIS_LLM_API_KEY` empty. Optionally set
-`JARVIS_DATABASE_PATH` (default: `data/jarvis.db` under the repo root).
-Do not put real keys in `.env.example` or in source files.
+`.env` is gitignored. Leave `JARVIS_LLM_PROVIDER=fake` and
+`JARVIS_LLM_API_KEY` empty unless you want a real API.
 
-Create the database (this writes `data/jarvis.db`, which is gitignored):
+Create the database:
 
 ```bash
 jarvis db upgrade
@@ -33,13 +33,23 @@ jarvis db upgrade
 
 ```bash
 python -m jarvis --help
-python -m jarvis --version
 python -m jarvis
-jarvis db current
+jarvis llm generate "hello"
+jarvis llm classify "add milk to my list" --labels CHAT,TASK,REMINDER
 ```
 
-Status prints whether `.env` loaded, whether an API key is **set** (not the
-key), and the database path/revision.
+Status prints the provider name and whether an API key is **set** (not the key).
+
+To use OpenAI (or any compatible host: Groq, Ollama, …), in `.env`:
+
+```
+JARVIS_LLM_PROVIDER=openai_compatible
+JARVIS_LLM_API_KEY=your-key-here
+JARVIS_LLM_BASE_URL=https://api.openai.com/v1
+JARVIS_LLM_MODEL=gpt-4o-mini
+```
+
+Never commit `.env`. Never put a real key in `.env.example`.
 
 ## Tests
 
@@ -47,7 +57,9 @@ key), and the database path/revision.
 pytest
 ```
 
+Tests use the fake provider and a mocked HTTP client. They do not call a live LLM.
+
 ## What is not here yet
 
-Agents, LLM providers, permissions, and the chat loop are later milestones.
-See `PROGRESS.md` for what shipped and what comes next.
+Agents, permissions, and the chat loop are later milestones.
+See `PROGRESS.md`.

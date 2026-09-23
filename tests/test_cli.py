@@ -61,3 +61,16 @@ def test_help_lists_new_commands(capsys: pytest.CaptureFixture[str]) -> None:
     assert "db" in out
     assert "memory" in out
     assert "conversation" in out
+    assert "llm" in out
+
+
+def test_llm_generate_and_classify_with_fake(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("JARVIS_LLM_PROVIDER", "fake")
+    assert main(["llm", "generate", "hello"]) == 0
+    assert main(["llm", "stream", "hello"]) == 0
+    assert main(["llm", "classify", "please TASK this", "--labels", "CHAT,TASK"]) == 0
+    out = capsys.readouterr().out
+    assert "[fake] hello" in out
+    assert "TASK" in out

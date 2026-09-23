@@ -13,6 +13,8 @@ _ENV_KEYS = (
     "JARVIS_LLM_API_KEY",
     "JARVIS_LLM_BASE_URL",
     "JARVIS_LLM_MODEL",
+    "JARVIS_LLM_PROVIDER",
+    "JARVIS_LLM_TIMEOUT_SECONDS",
     "JARVIS_DATABASE_PATH",
 )
 
@@ -36,6 +38,8 @@ def test_load_settings_without_env_file(monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.llm_base_url == "https://example.test/v1"
     assert settings.llm_model == "test-model"
     assert settings.database_path.name == "jarvis.db"
+    assert settings.llm_provider == "fake"
+    assert settings.llm_timeout_seconds == 60.0
 
 
 def test_load_settings_reads_dotenv_file(tmp_path: Path) -> None:

@@ -4,54 +4,54 @@ Read this file at the start of every session before changing code.
 
 ## Current milestone
 
-**M2 — Database + memory** (complete). Stop here until M2 is explicitly approved.
-Do not start M3 until then.
+**M3 — LLM abstraction** (complete). Stop here until M3 is explicitly approved.
+Do not start M4 until then.
+
+## What was built (M3)
+
+- `LLMProvider` interface: `generate()`, `stream()`, `classify()`.
+- `FakeProvider` — no network; used by default and in tests.
+- `OpenAICompatibleProvider` — HTTP Chat Completions via `httpx` (OpenAI, Groq,
+  many local servers). Not an official vendor SDK, so the host is a URL change.
+- `build_provider(settings)` from `JARVIS_LLM_PROVIDER`.
+- CLI: `jarvis llm generate|stream|classify`.
+- Errors explain HTTP 401/404/429/timeouts **without** printing the API key.
 
 ## What was built (M2)
 
-- SQLite file (default `data/jarvis.db`, override with `JARVIS_DATABASE_PATH`).
-- SQLAlchemy 2 models: `memories`, `conversation_messages`.
-- Alembic migration `001_m2_memory` plus `jarvis db upgrade` / `jarvis db current`.
-- `MemoryStore`: create/update (upsert), get, list-by-category, delete.
-  Categories: `USER_PROFILE`, `TASKS`, `PREFERENCES`, `CONVERSATION_CONTEXT`.
-- `ConversationStore`: append a turn (`user` / `assistant` / `system`) and
-  `recent(limit)` (oldest-first window). **No summarization.**
-- CLI: `jarvis memory …`, `jarvis conversation …`.
-- Tests for stores, migrations, CLI, and config path resolution.
+- SQLite, Alembic, `MemoryStore`, `ConversationStore`, related CLI.
 
 ## What was built (M1)
 
-- Python package under `src/jarvis/` with CLI entry points.
-- Config loader from `.env`; `.env.example`; `.gitignore`; README.
+- Package layout, dotenv config, CLI entry points.
 
-## Key decisions and why (M2)
+## Key decisions and why (M3)
 
-- **SQLite + SQLAlchemy + Alembic** — one local file, no database server; models
-  in Python; schema changes recorded as migrations instead of ad-hoc SQL.
-- **Only memory + conversation tables** — tasks, reminders, action logs, and
-  confirmations wait for M4–M6 so this milestone stays testable on its own.
-- **Unique `(category, key)`** — setting the same fact twice updates it; the
-  same key in two categories is allowed (a TASKS `name` is not a profile name).
-- **Explicit `jarvis db upgrade`** — the CLI does not silently create a schema
-  on first read, so a missing file is an error with a next step.
-- **Timestamps stored as UTC without tzinfo** — SQLite has no timezone type;
-  we always write UTC.
-- **Conversation store is append-only** — we persist turns so M7 can reload
-  them; we do **not** write `CONVERSATION_CONTEXT` summaries yet.
+- **Default provider is `fake`** — you can test the CLI without creating a
+  vendor account. Switch to `openai_compatible` in `.env` when you have a key.
+- **Raw HTTP instead of the OpenAI Python SDK** — one adapter covers any
+  OpenAI-compatible `/v1/chat/completions` host. A later Anthropic adapter
+  would be a new file that still implements `LLMProvider`.
+- **`classify()` is a constrained generate** — the model must reply with one
+  of the given labels; we reject anything else instead of guessing.
+- **Fake classify is deterministic** — if the sample text contains exactly one
+  label name, that label wins; if none, the first label; if several, error.
+  That keeps tests honest without a silent fallback when the input is messy.
+- **Secrets** — still only in local `.env`. HTTP 401 messages tell you to check
+  the key, never echo it.
 
-## Key decisions (M1, still in force)
+## Key decisions still in force
 
-- CLI-only; Python 3.12 src layout; secrets only in local `.env`; no real keys
-  in the repo.
+- CLI-only; Python 3.12; SQLite; no real keys in the repo.
+- Only memory + conversation tables so far.
 
 ## Conversation summarization (M7 — not decided)
 
 When we reach the orchestrator/chat loop, **do not invent** when
 `conversation_messages` get summarized into
-`memories.CONVERSATION_CONTEXT`. Ask first (every N messages vs end of
-session vs something else).
+`memories.CONVERSATION_CONTEXT`. Ask first.
 
 ## What's next
 
-**M3 — LLM abstraction** (not started). Interface + OpenAI-compatible provider
-+ FakeProvider; `generate` / `stream` / `classify`. No routing yet.
+**M4 — Permissions + action log** (not started). Levels 0–3 gate, confirmation
+prompt, every tool call logged. No task/reminder business logic yet.
