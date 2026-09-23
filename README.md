@@ -1,8 +1,8 @@
 # Jarvis
 
-Personal CLI assistant. This repository is in **Milestone 1 (foundation)** —
-package layout, config from `.env`, and a CLI that prints `--help` / status.
-There is no chat loop, database, or LLM calls yet.
+Personal CLI assistant. This repository is in **Milestone 2 (database + memory)** —
+SQLite persistence for categorized facts and conversation turns. There is no
+chat loop, agents, or LLM calls yet.
 
 ## Requirements
 
@@ -19,8 +19,15 @@ pip install -e ".[dev]"
 cp .env.example .env
 ```
 
-`.env` is gitignored. Leave `JARVIS_LLM_API_KEY` empty for Milestone 1.
+`.env` is gitignored. Leave `JARVIS_LLM_API_KEY` empty. Optionally set
+`JARVIS_DATABASE_PATH` (default: `data/jarvis.db` under the repo root).
 Do not put real keys in `.env.example` or in source files.
+
+Create the database (this writes `data/jarvis.db`, which is gitignored):
+
+```bash
+jarvis db upgrade
+```
 
 ## Run
 
@@ -28,12 +35,11 @@ Do not put real keys in `.env.example` or in source files.
 python -m jarvis --help
 python -m jarvis --version
 python -m jarvis
-# after install, this also works:
-jarvis --help
+jarvis db current
 ```
 
-You should see a short status line (version, whether `.env` loaded, whether
-an API key is set — not the key itself).
+Status prints whether `.env` loaded, whether an API key is **set** (not the
+key), and the database path/revision.
 
 ## Tests
 
@@ -43,5 +49,5 @@ pytest
 
 ## What is not here yet
 
-Agents, SQLite, LLM providers, and the chat loop are later milestones.
+Agents, LLM providers, permissions, and the chat loop are later milestones.
 See `PROGRESS.md` for what shipped and what comes next.

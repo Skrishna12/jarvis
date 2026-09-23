@@ -9,17 +9,18 @@ import pytest
 
 from jarvis.config import load_settings
 
-_LLM_KEYS = (
+_ENV_KEYS = (
     "JARVIS_LLM_API_KEY",
     "JARVIS_LLM_BASE_URL",
     "JARVIS_LLM_MODEL",
+    "JARVIS_DATABASE_PATH",
 )
 
 
 @pytest.fixture(autouse=True)
 def clear_llm_env(monkeypatch: pytest.MonkeyPatch) -> None:
     """Each test starts without leftover LLM env vars from dotenv or other tests."""
-    for key in _LLM_KEYS:
+    for key in _ENV_KEYS:
         monkeypatch.delenv(key, raising=False)
 
 
@@ -34,6 +35,7 @@ def test_load_settings_without_env_file(monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.llm_api_key == ""
     assert settings.llm_base_url == "https://example.test/v1"
     assert settings.llm_model == "test-model"
+    assert settings.database_path.name == "jarvis.db"
 
 
 def test_load_settings_reads_dotenv_file(tmp_path: Path) -> None:
@@ -73,3 +75,12 @@ def test_process_env_wins_over_dotenv_file(
 
     assert settings.llm_model == "from-process"
     assert os.getenv("JARVIS_LLM_MODEL") == "from-process"
+
+
+def test_relative_database_path_resolves_from_project_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("JARVIS_DATABASE_PATH", "tmp/custom.db")
+    settings = load_settings(env_file=None)
+    assert settings.database_path.as_posix().endswith("tmp/custom.db")
+    assert settings.database_path.is_absolute()

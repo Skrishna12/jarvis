@@ -1,8 +1,7 @@
 """Load settings from environment variables and an optional .env file.
 
-Milestone 1: we only load and expose settings. We do not require an API key
-yet (the LLM is Milestone 3). Missing optional values stay empty strings
-instead of crashing, so you can run the CLI before you have a key.
+LLM keys are still optional (the provider is Milestone 3). The database path
+is used from Milestone 2 onward.
 """
 
 from __future__ import annotations
@@ -14,8 +13,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Repo root: src/jarvis/config.py → parents[2] is the project root.
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]
-_ENV_PATH = _PROJECT_ROOT / ".env"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_ENV_PATH = PROJECT_ROOT / ".env"
+_DEFAULT_DB_PATH = PROJECT_ROOT / "data" / "jarvis.db"
 
 
 @dataclass(frozen=True)
@@ -28,7 +28,17 @@ class Settings:
     llm_api_key: str
     llm_base_url: str
     llm_model: str
+    database_path: Path
     env_file_loaded: bool
+
+
+def _resolve_database_path(raw: str) -> Path:
+    if not raw:
+        return _DEFAULT_DB_PATH
+    path = Path(raw).expanduser()
+    if path.is_absolute():
+        return path
+    return PROJECT_ROOT / path
 
 
 def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
@@ -49,5 +59,8 @@ def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
             "JARVIS_LLM_BASE_URL", "https://api.openai.com/v1"
         ).strip(),
         llm_model=os.getenv("JARVIS_LLM_MODEL", "gpt-4o-mini").strip(),
+        database_path=_resolve_database_path(
+            os.getenv("JARVIS_DATABASE_PATH", "").strip()
+        ),
         env_file_loaded=loaded,
     )

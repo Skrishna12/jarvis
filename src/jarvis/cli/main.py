@@ -1,7 +1,7 @@
 """CLI entry point.
 
-Milestone 1 only exposes --help / --version and a short status line.
-The chat loop arrives in Milestone 7.
+Milestone 2 adds `db`, `memory`, and `conversation` subcommands.
+The chat loop still arrives in Milestone 7.
 """
 
 from __future__ import annotations
@@ -10,36 +10,37 @@ import argparse
 import sys
 
 from jarvis import __version__
-from jarvis.config import load_settings
+from jarvis.cli import conversation as conversation_cmd
+from jarvis.cli import database as database_cmd
+from jarvis.cli import memory as memory_cmd
+from jarvis.cli.status import print_status
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="jarvis",
-        description="Personal CLI assistant (Milestone 1: foundation only).",
+        description="Personal CLI assistant (Milestone 2: database + memory).",
     )
     parser.add_argument(
         "--version",
         action="version",
         version=f"jarvis {__version__}",
     )
+    subparsers = parser.add_subparsers(dest="command")
+    database_cmd.register(subparsers)
+    memory_cmd.register(subparsers)
+    conversation_cmd.register(subparsers)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
-    parser.parse_args(argv)
-
-    settings = load_settings()
-    key_state = "set" if settings.llm_api_key else "not set"
-    env_state = "yes" if settings.env_file_loaded else "no"
-
-    print(f"Jarvis {__version__} — foundation only (Milestone 1).")
-    print("Chat, agents, and database are not wired yet.")
-    print(f"  .env file loaded: {env_state}")
-    print(f"  JARVIS_LLM_API_KEY: {key_state}")
-    print(f"  JARVIS_LLM_MODEL: {settings.llm_model}")
-    return 0
+    args = parser.parse_args(argv)
+    handler = getattr(args, "handler", None)
+    if handler is None:
+        print_status()
+        return 0
+    return handler(args)
 
 
 if __name__ == "__main__":
