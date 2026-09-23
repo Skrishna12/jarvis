@@ -45,7 +45,7 @@ def test_stream_yields_delta_chunks() -> None:
     )
 
     def handler(request: httpx.Request) -> httpx.Response:
-        assert b'"stream": true' in request.content
+        assert b'"stream":true' in request.content
         return httpx.Response(
             200,
             content=sse.encode("utf-8"),
