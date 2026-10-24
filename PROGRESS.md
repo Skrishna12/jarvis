@@ -4,54 +4,48 @@ Read this file at the start of every session before changing code.
 
 ## Current milestone
 
-**M3 — LLM abstraction** (complete). Stop here until M3 is explicitly approved.
-Do not start M4 until then.
+**M4–M7 complete** for the Phase 1–2 brief (permissions, tasks, reminders,
+orchestrator chat). Email/calendar/GitHub/voice/RAG remain out of scope.
 
-## What was built (M3)
+## What was built (M4–M7)
 
-- `LLMProvider` interface: `generate()`, `stream()`, `classify()`.
-- `FakeProvider` — no network; used by default and in tests.
-- `OpenAICompatibleProvider` — HTTP Chat Completions via `httpx` (OpenAI, Groq,
-  many local servers). Not an official vendor SDK, so the host is a URL change.
-- `build_provider(settings)` from `JARVIS_LLM_PROVIDER`.
-- CLI: `jarvis llm generate|stream|classify`.
-- Errors explain HTTP 401/404/429/timeouts **without** printing the API key.
+- Permission levels 0–3. Tools declare a level. Level 2+ stores a pending
+  confirmation and waits for `yes` / `jarvis confirm approve`.
+- `action_logs` for every tool attempt (timestamp, agent, action, level,
+  redacted payload, result).
+- Task agent/tools: create, update, complete, prioritize, subtasks, delete.
+- Reminder agent/tools: one-time, recurring (`daily`/`weekly`), deadline
+  (optional task link), due-check that rolls recurring times forward.
+- Orchestrator: heuristic intent + rule planner (works with FakeProvider) and
+  JSON planner when a real LLM replies with a tool object.
+- `jarvis chat` loop; conversation rows persisted; **no auto-summarization**.
 
-## What was built (M2)
+## What was built (M1–M3)
 
-- SQLite, Alembic, `MemoryStore`, `ConversationStore`, related CLI.
+- Package, dotenv config, SQLite memory/conversation, LLM interface
+  (`generate` / `stream` / `classify`), Fake + OpenAI-compatible providers.
 
-## What was built (M1)
+## Key decisions (M4–M7)
 
-- Package layout, dotenv config, CLI entry points.
+- **Every agent write goes through `PermissionGate`** — agents cannot call
+  stores directly. Direct `jarvis memory` CLI remains an ungated admin path
+  for debugging.
+- **Heuristic planner + LLM JSON** — FakeProvider cannot emit tool JSON, so
+  obvious phrases (`create a task …`) are parsed locally. A real model can
+  still return `{"tool","payload"}`.
+- **No CONVERSATION_CONTEXT summaries** — you asked not to invent the
+  schedule. Chat reloads the last ~12 raw turns only.
+- **Level 3 reserved** — the gate treats it like level 2 (must confirm). No
+  default tool is registered at level 3.
+- **Secrets** — still only in `.env`. Action logs redact keys named
+  api_key/token/password/secret/authorization.
 
-## Key decisions and why (M3)
+## Conversation summarization (still not decided)
 
-- **Default provider is `fake`** — you can test the CLI without creating a
-  vendor account. Switch to `openai_compatible` in `.env` when you have a key.
-- **Raw HTTP instead of the OpenAI Python SDK** — one adapter covers any
-  OpenAI-compatible `/v1/chat/completions` host. A later Anthropic adapter
-  would be a new file that still implements `LLMProvider`.
-- **`classify()` is a constrained generate** — the model must reply with one
-  of the given labels; we reject anything else instead of guessing.
-- **Fake classify is deterministic** — if the sample text contains exactly one
-  label name, that label wins; if none, the first label; if several, error.
-  That keeps tests honest without a silent fallback when the input is messy.
-- **Secrets** — still only in local `.env`. HTTP 401 messages tell you to check
-  the key, never echo it.
-
-## Key decisions still in force
-
-- CLI-only; Python 3.12; SQLite; no real keys in the repo.
-- Only memory + conversation tables so far.
-
-## Conversation summarization (M7 — not decided)
-
-When we reach the orchestrator/chat loop, **do not invent** when
-`conversation_messages` get summarized into
-`memories.CONVERSATION_CONTEXT`. Ask first.
+Ask before writing summaries into `memories.CONVERSATION_CONTEXT`
+(every N messages vs end of session vs something else).
 
 ## What's next
 
-**M4 — Permissions + action log** (not started). Levels 0–3 gate, confirmation
-prompt, every tool call logged. No task/reminder business logic yet.
+Later phases from the long-term vision (email, calendar, GitHub, RAG, voice)
+only after an explicit green light and a brief update.

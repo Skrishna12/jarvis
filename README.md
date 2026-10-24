@@ -1,55 +1,44 @@
 # Jarvis
 
-Personal CLI assistant. This repository is in **Milestone 3 (LLM providers)** —
-a vendor-neutral interface (`generate`, `stream`, `classify`) with a fake
-provider for tests and an OpenAI-compatible HTTP adapter. There is no agent
-routing or chat loop yet.
+Personal CLI assistant. **Phase 1–2** is in: chat orchestrator, task and
+reminder agents, permission levels, action log, SQLite memory.
 
-## Requirements
-
-- Python 3.12+
-- A virtual environment (recommended)
+Out of scope (later): email, calendar, GitHub, voice, mobile, RAG, computer
+control, proactive suggestions.
 
 ## Setup
 
 ```bash
-cd jarvis
 python3.12 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -e ".[dev]"
 cp .env.example .env
-```
-
-`.env` is gitignored. Leave `JARVIS_LLM_PROVIDER=fake` and
-`JARVIS_LLM_API_KEY` empty unless you want a real API.
-
-Create the database:
-
-```bash
 jarvis db upgrade
 ```
 
-## Run
+`.env` is gitignored. Default `JARVIS_LLM_PROVIDER=fake` needs no API key.
+Set `openai_compatible` and `JARVIS_LLM_API_KEY` only in `.env` if you want a
+real model. Never put a real key in `.env.example`.
+
+## Try it
 
 ```bash
-python -m jarvis --help
-python -m jarvis
-jarvis llm generate "hello"
-jarvis llm classify "add milk to my list" --labels CHAT,TASK,REMINDER
+jarvis chat
+# or one shot:
+jarvis chat --once "create a task buy milk"
+jarvis task list
+jarvis reminder create "standup" --at 2026-10-25T09:00:00
+jarvis log
 ```
 
-Status prints the provider name and whether an API key is **set** (not the key).
+Deletes need confirmation (level 2):
 
-To use OpenAI (or any compatible host: Groq, Ollama, …), in `.env`:
-
+```bash
+jarvis task delete <id>
+jarvis confirm list
+jarvis confirm approve <pending-id>
+# in chat, type yes or no
 ```
-JARVIS_LLM_PROVIDER=openai_compatible
-JARVIS_LLM_API_KEY=your-key-here
-JARVIS_LLM_BASE_URL=https://api.openai.com/v1
-JARVIS_LLM_MODEL=gpt-4o-mini
-```
-
-Never commit `.env`. Never put a real key in `.env.example`.
 
 ## Tests
 
@@ -57,9 +46,7 @@ Never commit `.env`. Never put a real key in `.env.example`.
 pytest
 ```
 
-Tests use the fake provider and a mocked HTTP client. They do not call a live LLM.
+## Conversation summaries
 
-## What is not here yet
-
-Agents, permissions, and the chat loop are later milestones.
-See `PROGRESS.md`.
+Chat turns are stored in `conversation_messages`. They are **not** automatically
+summarized into `memories.CONVERSATION_CONTEXT` — that policy is still open.

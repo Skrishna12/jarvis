@@ -62,6 +62,9 @@ def test_help_lists_new_commands(capsys: pytest.CaptureFixture[str]) -> None:
     assert "memory" in out
     assert "conversation" in out
     assert "llm" in out
+    assert "chat" in out
+    assert "task" in out
+    assert "confirm" in out
 
 
 def test_llm_generate_and_classify_with_fake(
@@ -74,3 +77,25 @@ def test_llm_generate_and_classify_with_fake(
     out = capsys.readouterr().out
     assert "[fake] hello" in out
     assert "TASK" in out
+
+
+def test_task_create_delete_confirm_and_chat(
+    isolated_db: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("JARVIS_LLM_PROVIDER", "fake")
+    assert main(["db", "upgrade"]) == 0
+    assert main(["task", "create", "buy milk", "--priority", "high"]) == 0
+    assert main(["task", "list"]) == 0
+    out = capsys.readouterr().out
+    assert "buy milk" in out
+
+    assert main(["chat", "--once", "list tasks"]) == 0
+    chat_out = capsys.readouterr().out
+    assert "buy milk" in chat_out
+
+    assert main(["tools", "run", "task.delete", "--payload", '{"id":"missing"}']) == 0
+    waiting = capsys.readouterr().out
+    assert "needs your confirmation" in waiting or "permission level 2" in waiting
+    assert main(["confirm", "list"]) == 0
+    listed = capsys.readouterr().out
+    assert "task.delete" in listed

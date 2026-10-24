@@ -1,4 +1,4 @@
-"""Alembic migrations create the Milestone 2 tables."""
+"""Alembic migrations create Phase 1–2 tables."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ def test_upgrade_creates_tables_and_revision(tmp_path: Path) -> None:
     upgrade_head(db_path)
 
     assert db_path.is_file()
-    assert current_revision(db_path) == "001_m2_memory"
+    assert current_revision(db_path) == "003_m5_m6_work"
 
     engine = make_engine(db_path)
     try:
@@ -25,4 +25,8 @@ def test_upgrade_creates_tables_and_revision(tmp_path: Path) -> None:
 
     assert "memories" in names
     assert "conversation_messages" in names
+    assert "action_logs" in names
+    assert "pending_confirmations" in names
+    assert "tasks" in names
+    assert "reminders" in names
     assert "alembic_version" in names
