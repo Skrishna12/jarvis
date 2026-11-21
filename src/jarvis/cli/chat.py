@@ -28,6 +28,7 @@ def cmd_chat(args: argparse.Namespace) -> int:
         return _one_turn(args.once)
     print("Jarvis chat. Type quit to exit, yes/no to confirm pending actions.")
     _print_due_briefing()
+    _print_morning_news()
     try:
         while True:
             try:
@@ -53,6 +54,16 @@ def _print_due_briefing() -> None:
         return
     if briefing:
         print(briefing)
+
+
+def _print_morning_news() -> None:
+    """Interactive chat only: pull today's headlines without slowing --once tests."""
+    from jarvis.news.feeds import fetch_digest, format_digest
+
+    try:
+        print(format_digest(fetch_digest()))
+    except Exception as exc:
+        print(f"News unavailable: {exc}")
 
 
 def _one_turn(text: str) -> int:

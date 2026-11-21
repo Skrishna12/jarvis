@@ -55,6 +55,87 @@ def plan_from_text(text: str) -> Plan | None:
     stripped = text.strip()
     lower = stripped.lower()
 
+    if "remind" in lower and any(
+        word in lower for word in ("office", "commute", "weekday")
+    ):
+        return Plan("commute.install", {})
+    if lower in {"call me", "ping me", "alert me", "ring me"}:
+        return Plan("alert.ping", {"text": "Jarvis checking in.", "call": "yes"})
+    if lower in {
+        "traffic",
+        "how's traffic",
+        "hows traffic",
+        "commute",
+        "office commute",
+    }:
+        return Plan("commute.traffic", {})
+    if lower in {
+        "set up commute",
+        "setup commute",
+        "install commute",
+        "set my commute reminders",
+        "set commute reminders",
+    }:
+        return Plan("commute.install", {})
+    if lower in {"news", "headlines", "daily news", "today's news", "todays news"}:
+        return Plan("news.digest", {})
+    if lower in {"morning briefing", "brief me", "daily briefing", "morning brief"}:
+        return Plan("briefing.morning", {})
+    if lower in {"evening briefing", "evening wrap", "wrap up"}:
+        return Plan("briefing.evening", {})
+    if lower in {"today's calendar", "todays calendar", "calendar today", "what's on today", "whats on today"}:
+        return Plan("calendar.today", {})
+    if lower in {"list calendar", "show calendar", "calendar"}:
+        return Plan("calendar.list", {})
+    if lower in {"list projects", "show projects", "projects"}:
+        return Plan("project.list", {})
+    if lower in {"github repos", "list repos", "my repos"}:
+        return Plan("github.repos", {})
+    if lower in {"notifications", "unread notifications", "list notifications"}:
+        return Plan("notify.list", {})
+
+    match = re.search(
+        r"\b(?:commute city|set commute city|my city is|i live in)\b[:\s-]*(.+)$",
+        stripped,
+        re.I,
+    )
+    if match:
+        return Plan("commute.set_city", {"city": match.group(1).strip().rstrip(".")})
+
+    match = re.search(r"\b(?:create|add|new)\b.{0,20}\bproject\b[:\s-]*(.+)$", stripped, re.I)
+    if match:
+        return Plan("project.create", {"name": match.group(1).strip().rstrip(".")})
+    match = re.search(
+        r"\b(?:schedule|create event|add event|calendar)\b[:\s-]*(.+)$",
+        stripped,
+        re.I,
+    )
+    if match and "list" not in lower and "today" not in lower:
+        rest = match.group(1).strip()
+        when, title = _split_when(rest)
+        payload: dict[str, Any] = {"title": title or rest}
+        if when:
+            payload["start_at"] = when
+        return Plan("calendar.create", payload)
+    match = re.search(r"\b(?:issues?|github issues)\b.{0,20}\b([\w.-]+/[\w.-]+)\b", stripped, re.I)
+    if match:
+        return Plan("github.issues", {"repo": match.group(1)})
+    match = re.search(
+        r"\b(?:pull requests?|prs|github pulls)\b.{0,20}\b([\w.-]+/[\w.-]+)\b",
+        stripped,
+        re.I,
+    )
+    if match:
+        return Plan("github.pulls", {"repo": match.group(1)})
+    match = re.search(r"\b(?:ingest|index)\b.{0,20}\b(?:doc|document|file)?[:\s-]*(.+)$", stripped, re.I)
+    if match and ("doc" in lower or "ingest" in lower or "index" in lower):
+        path = match.group(1).strip()
+        if path:
+            return Plan("docs.ingest", {"path": path})
+    match = re.search(r"\b(?:search docs|search documents|find in docs)\b[:\s-]*(.+)$", stripped, re.I)
+    if match:
+        return Plan("docs.search", {"query": match.group(1).strip()})
+
     if lower in {"list emails", "show emails", "inbox", "list inbox"}:
         return Plan("email.list", {})
     if lower in {

@@ -1,0 +1,89 @@
+from __future__ import annotations
+
+from typing import Any
+
+from sqlalchemy.orm import Session
+
+from jarvis.commute.schedule import commute_card, resolve_city
+from jarvis.commute.setup import FINISH_TITLE, LEAVE_TITLE, install_commute_reminders
+from jarvis.commute.traffic import fetch_traffic, format_traffic
+from jarvis.memory.store import MemoryStore
+from jarvis.security.levels import PermissionLevel
+from jarvis.tools.base import Tool, ToolResult
+
+
+class CommuteStatusTool(Tool):
+    name = "commute.status"
+    description = "Weekday office hours and commute city."
+    agent = "commute"
+    level = PermissionLevel.READ
+
+    def run(self, session: Session, payload: dict[str, Any]) -> ToolResult:
+        del payload
+        text = commute_card(session=session)
+        return ToolResult(True, text, {"city": resolve_city(session)})
+
+
+class CommuteTrafficTool(Tool):
+    name = "commute.traffic"
+    description = "Traffic and delay headlines for the commute city."
+    agent = "commute"
+    level = PermissionLevel.READ
+
+    def run(self, session: Session, payload: dict[str, Any]) -> ToolResult:
+        del payload
+        section = fetch_traffic(session=session)
+        return ToolResult(
+            True,
+            commute_card(session=session) + "\n" + format_traffic(section),
+            {
+                "city": resolve_city(session),
+                "error": section.error,
+                "headlines": [h.title for h in section.headlines],
+            },
+        )
+
+
+class CommuteSetCityTool(Tool):
+    name = "commute.set_city"
+    description = "Remember the city used for traffic headlines."
+    agent = "commute"
+    level = PermissionLevel.SAFE
+
+    def run(self, session: Session, payload: dict[str, Any]) -> ToolResult:
+        city = str(payload.get("city") or "").strip()
+        if not city:
+            return ToolResult(
+                False,
+                "Tell me the city, e.g. commute.set_city city=Hyderabad.",
+            )
+        MemoryStore(session).upsert("USER_PROFILE", "commute_city", city)
+        return ToolResult(True, f"I'll use {city} for traffic headlines.", {"city": city})
+
+
+class CommuteInstallTool(Tool):
+    name = "commute.install"
+    description = "Create weekday leave-for-office and office-finishing reminders."
+    agent = "commute"
+    level = PermissionLevel.SAFE
+
+    def run(self, session: Session, payload: dict[str, Any]) -> ToolResult:
+        del payload
+        created = install_commute_reminders(session)
+        card = commute_card(session=session)
+        if not created:
+            return ToolResult(
+                True,
+                "Commute reminders already exist.\n" + card,
+                {"created": [], "titles": [LEAVE_TITLE, FINISH_TITLE]},
+            )
+        return ToolResult(
+            True,
+            "Set weekday reminders: "
+            + ", ".join(created)
+            + ".\n"
+            + card
+            + "\nCalls: due reminders ring you if Twilio is enabled; "
+            "morning traffic can too. News and briefing are updates, not calls.",
+            {"created": created},
+        )

@@ -20,6 +20,17 @@ _ENV_KEYS = (
     "JARVIS_EMAIL_BACKEND",
     "JARVIS_EMAIL_ADDRESS",
     "JARVIS_EMAIL_PASSWORD",
+    "JARVIS_GITHUB_BACKEND",
+    "JARVIS_GITHUB_TOKEN",
+    "JARVIS_TELEGRAM_BOT_TOKEN",
+    "JARVIS_TELEGRAM_CHAT_ID",
+    "JARVIS_VOICE_BACKEND",
+    "JARVIS_TWILIO_ACCOUNT_SID",
+    "JARVIS_TWILIO_AUTH_TOKEN",
+    "JARVIS_TWILIO_FROM",
+    "JARVIS_VOICE_TO",
+    "JARVIS_ALERT_CALL",
+    "JARVIS_COMMUTE_CITY",
 )
 
 
@@ -46,6 +57,19 @@ def test_load_settings_without_env_file(monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.llm_timeout_seconds == 60.0
     assert settings.summary_every_messages == 10
     assert settings.email_backend == "fake"
+    assert settings.github_backend == "fake"
+    assert settings.github_token == ""
+    assert "news.google.com" in settings.news_national_feed
+    assert "WORLD" in settings.news_world_feed
+    assert settings.news_per_section == 6
+    assert settings.timezone == "Asia/Kolkata"
+    assert settings.commute_leave == "09:00"
+    assert settings.commute_arrive == "09:40"
+    assert settings.commute_finish == "18:30"
+    assert settings.telegram_bot_token == ""
+    assert settings.voice_backend == "fake"
+    assert settings.alert_call is False
+    assert settings.alert_call_morning is True
 
 
 def test_load_settings_reads_dotenv_file(tmp_path: Path) -> None:

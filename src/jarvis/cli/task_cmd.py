@@ -14,7 +14,13 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
     listed = sub.add_parser("list")
     listed.add_argument("--status", default="")
-    listed.set_defaults(handler=lambda a: _run("task.list", {"status": a.status or None}))
+    listed.add_argument("--project-id", dest="project_id", default="")
+    listed.set_defaults(
+        handler=lambda a: _run(
+            "task.list",
+            {"status": a.status or None, "project_id": a.project_id or None},
+        )
+    )
 
     get_p = sub.add_parser("get")
     get_p.add_argument("id")
@@ -25,6 +31,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     create.add_argument("--priority", default="medium")
     create.add_argument("--due-at", dest="due_at", default="")
     create.add_argument("--description", default="")
+    create.add_argument("--project-id", dest="project_id", default="")
     create.set_defaults(
         handler=lambda a: _run(
             "task.create",
@@ -33,6 +40,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
                 "priority": a.priority,
                 "due_at": a.due_at or None,
                 "description": a.description,
+                "project_id": a.project_id or None,
             },
         )
     )

@@ -24,6 +24,7 @@ class TaskListTool(Tool):
         records = _store(session).list(
             status=payload.get("status") or None,
             parent_id=payload.get("parent_id") or None,
+            project_id=payload.get("project_id") or None,
         )
         if not records:
             return ToolResult(True, "No tasks.", {"items": []})
@@ -54,6 +55,7 @@ class TaskCreateTool(Tool):
             description=str(payload.get("description", "")),
             priority=str(payload.get("priority", "medium")),
             parent_id=payload.get("parent_id") or None,
+            project_id=payload.get("project_id") or None,
             due_at=payload.get("due_at") or None,
         )
         return ToolResult(True, f"Created task {record.id[:8]}: {record.title}", record_data(record))
@@ -73,6 +75,7 @@ class TaskUpdateTool(Tool):
             status=payload.get("status"),
             priority=payload.get("priority"),
             due_at=payload.get("due_at"),
+            project_id=payload.get("project_id"),
         )
         return ToolResult(True, f"Updated task {record.id[:8]}.", record_data(record))
 

@@ -32,8 +32,13 @@ def advance_recurrence(when: datetime, recurrence: str) -> datetime:
         return when + timedelta(days=1)
     if recurrence == "weekly":
         return when + timedelta(weeks=1)
+    if recurrence == "weekdays":
+        nxt = when + timedelta(days=1)
+        while nxt.weekday() >= 5:
+            nxt += timedelta(days=1)
+        return nxt
     raise DateParseError(
-        f"Unknown recurrence {recurrence!r}. Use daily or weekly."
+        f"Unknown recurrence {recurrence!r}. Use daily, weekly, or weekdays."
     )
 
 

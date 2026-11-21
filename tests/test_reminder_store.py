@@ -32,6 +32,18 @@ def test_daily_recurrence_rolls_forward(db_session) -> None:
     assert fired.trigger_at == datetime(2026, 1, 2, 9, 0, 0)
 
 
+def test_weekdays_recurrence_skips_weekend(db_session) -> None:
+    store = ReminderStore(db_session)
+    reminder = store.create(
+        "Leave for office",
+        kind="recurring",
+        recurrence="weekdays",
+        trigger_at="2026-11-20T08:20:00",
+    )
+    fired = store.mark_fired(reminder.id)
+    assert fired.trigger_at == datetime(2026, 11, 23, 8, 20, 0)
+
+
 def test_deadline_can_link_task(db_session) -> None:
     task = TaskStore(db_session).create("Ship MVP")
     reminder = ReminderStore(db_session).create(

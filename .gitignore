@@ -26,3 +26,6 @@ data/
 .idea/
 .vscode/
 .DS_Store
+
+# Downloaded tunnel binary
+.local/

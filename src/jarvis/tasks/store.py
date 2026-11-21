@@ -28,6 +28,7 @@ class TaskRecord:
     status: str
     priority: str
     parent_id: str | None
+    project_id: str | None
     due_at: datetime | None
     created_at: datetime
     updated_at: datetime
@@ -42,6 +43,7 @@ def _to_record(row: Task) -> TaskRecord:
         status=row.status,
         priority=row.priority,
         parent_id=row.parent_id,
+        project_id=row.project_id,
         due_at=row.due_at,
         created_at=row.created_at,
         updated_at=row.updated_at,
@@ -60,6 +62,7 @@ class TaskStore:
         description: str = "",
         priority: str = "medium",
         parent_id: str | None = None,
+        project_id: str | None = None,
         due_at: str | None = None,
     ) -> TaskRecord:
         title = title.strip()
@@ -76,6 +79,7 @@ class TaskStore:
             status="open",
             priority=priority,
             parent_id=parent_id or None,
+            project_id=project_id or None,
             due_at=parse_datetime(due_at) if due_at else None,
             created_at=now,
             updated_at=now,
@@ -98,12 +102,15 @@ class TaskStore:
         *,
         status: str | None = None,
         parent_id: str | None = None,
+        project_id: str | None = None,
     ) -> list[TaskRecord]:
         stmt = select(Task).order_by(Task.priority.desc(), Task.created_at)
         if status:
             stmt = stmt.where(Task.status == _parse_choice(status, STATUSES, "status"))
         if parent_id:
             stmt = stmt.where(Task.parent_id == parent_id)
+        if project_id:
+            stmt = stmt.where(Task.project_id == project_id)
         return [_to_record(row) for row in self._session.scalars(stmt).all()]
 
     def update(
@@ -115,6 +122,7 @@ class TaskStore:
         status: str | None = None,
         priority: str | None = None,
         due_at: str | None = None,
+        project_id: str | None = None,
     ) -> TaskRecord:
         row = self._require(task_id)
         if title is not None:
@@ -133,6 +141,8 @@ class TaskStore:
             row.priority = _parse_choice(priority, PRIORITIES, "priority")
         if due_at is not None:
             row.due_at = parse_datetime(due_at) if due_at.strip() else None
+        if project_id is not None:
+            row.project_id = project_id.strip() or None
         row.updated_at = utc_now()
         self._session.flush()
         return _to_record(row)

@@ -13,7 +13,7 @@ from jarvis.db.models import Reminder, Task
 from jarvis.memory.errors import ValidationError
 
 KINDS = ("one_time", "recurring", "deadline")
-RECURRENCES = ("daily", "weekly")
+RECURRENCES = ("daily", "weekly", "weekdays")
 
 
 class ReminderNotFoundError(LookupError):
@@ -76,12 +76,12 @@ class ReminderStore:
         if kind == "recurring":
             if not recurrence:
                 raise ValidationError(
-                    "Recurring reminders need recurrence=daily or weekly."
+                    "Recurring reminders need recurrence=daily, weekly, or weekdays."
                 )
             rec = recurrence.strip().lower()
             if rec not in RECURRENCES:
                 raise ValidationError(
-                    f"Unknown recurrence {recurrence!r}. Use daily or weekly."
+                    f"Unknown recurrence {recurrence!r}. Use daily, weekly, or weekdays."
                 )
         elif recurrence:
             raise ValidationError(

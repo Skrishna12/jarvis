@@ -25,6 +25,25 @@ from jarvis.tools.email_tools import (
     EmailSendTool,
     EmailSummarizeTool,
 )
+from jarvis.tools.alert_tools import AlertPingTool
+from jarvis.tools.briefing_tools import BriefingEveningTool, BriefingMorningTool
+from jarvis.tools.calendar_tools import (
+    CalendarCreateTool,
+    CalendarDeleteTool,
+    CalendarListTool,
+    CalendarTodayTool,
+)
+from jarvis.tools.docs_tools import DocsIngestTool, DocsSearchTool
+from jarvis.tools.github_tools import GitHubIssuesTool, GitHubPullsTool, GitHubReposTool
+from jarvis.tools.commute_tools import (
+    CommuteInstallTool,
+    CommuteSetCityTool,
+    CommuteStatusTool,
+    CommuteTrafficTool,
+)
+from jarvis.tools.news_tools import NewsDigestTool
+from jarvis.tools.notify_tools import NotifyListTool, NotifyReadTool
+from jarvis.tools.project_tools import ProjectCreateTool, ProjectListTool, ProjectUpdateTool
 from jarvis.tools.task_tools import (
     TaskAddSubtaskTool,
     TaskCompleteTool,
@@ -64,6 +83,28 @@ def default_registry() -> ToolRegistry:
         EmailSummarizeTool(),
         EmailDraftTool(),
         EmailSendTool(),
+        ProjectListTool(),
+        ProjectCreateTool(),
+        ProjectUpdateTool(),
+        CalendarTodayTool(),
+        CalendarListTool(),
+        CalendarCreateTool(),
+        CalendarDeleteTool(),
+        GitHubReposTool(),
+        GitHubIssuesTool(),
+        GitHubPullsTool(),
+        DocsIngestTool(),
+        DocsSearchTool(),
+        NotifyListTool(),
+        NotifyReadTool(),
+        NewsDigestTool(),
+        CommuteStatusTool(),
+        CommuteTrafficTool(),
+        CommuteSetCityTool(),
+        CommuteInstallTool(),
+        BriefingMorningTool(),
+        BriefingEveningTool(),
+        AlertPingTool(),
     ):
         registry.register(tool)
     return registry

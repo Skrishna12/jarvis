@@ -15,7 +15,23 @@ from jarvis.memory.summarize import ConversationSummarizer
 from jarvis.security.gate import GateOutcome, PermissionGate
 from jarvis.tools.catalog import default_registry
 
-_INTENTS = ("CHAT", "TASK", "REMINDER", "MEMORY", "EMAIL", "CONFIRM")
+_INTENTS = (
+    "CHAT",
+    "TASK",
+    "REMINDER",
+    "MEMORY",
+    "EMAIL",
+    "CALENDAR",
+    "PROJECT",
+    "GITHUB",
+    "DOCS",
+    "NOTIFY",
+    "BRIEFING",
+    "NEWS",
+    "COMMUTE",
+    "ALERT",
+    "CONFIRM",
+)
 _YES = {"yes", "y", "ok", "okay", "approve", "confirm"}
 _NO = {"no", "n", "cancel", "deny", "nope"}
 
@@ -81,8 +97,8 @@ class Orchestrator:
             reply = plan.reply if plan and plan.reply else (
                 "I understood this as "
                 f"{intent.lower()}, but I could not tell which action to take. "
-                "Try 'list tasks', 'create a task buy milk', or "
-                "'remind me standup 2026-10-25T09:00:00'."
+                "Try 'list tasks', 'morning briefing', "
+                "'calendar today', or 'create a task buy milk'."
             )
             return self._finish(TurnResult(reply, intent))
 
@@ -104,6 +120,24 @@ class Orchestrator:
 
     def _intent(self, text: str) -> str:
         lower = text.lower()
+        if any(word in lower for word in ("call me", "ring me", "alert me", "ping me")):
+            return "ALERT"
+        if any(word in lower for word in ("traffic", "commute", "office hours")):
+            return "COMMUTE"
+        if any(word in lower for word in ("news", "headline", "headlines")):
+            return "NEWS"
+        if any(word in lower for word in ("briefing", "brief me", "wrap up")):
+            return "BRIEFING"
+        if any(word in lower for word in ("calendar", "schedule", "meeting", "event")):
+            return "CALENDAR"
+        if any(word in lower for word in ("github", "pull request", "repos")):
+            return "GITHUB"
+        if any(word in lower for word in ("project",)):
+            return "PROJECT"
+        if any(word in lower for word in ("ingest", "search docs", "document")):
+            return "DOCS"
+        if any(word in lower for word in ("notification", "notifications")):
+            return "NOTIFY"
         if any(word in lower for word in ("email", "inbox", "mailbox")):
             return "EMAIL"
         if any(word in lower for word in ("remind", "reminder", "alarm")):
@@ -144,8 +178,21 @@ class Orchestrator:
         rolling = self._summarizer.latest()
         system = (
             "You are Jarvis, a personal CLI assistant. Be brief. "
-            "You can manage tasks, reminders, and email when asked. "
-            "Never claim you sent email. Drafts are not sent until the user confirms."
+            "You can manage tasks, reminders, email, calendar, projects, "
+            "local docs, read-only GitHub, commute/traffic, and daily news when asked. "
+            "The user's weekday office hours are already known: leave 09:00, "
+            "in by 09:40, finish 18:30 Asia/Kolkata, Monday to Friday. "
+            "They ride with a helmet Bluetooth intercom, so commute updates "
+            "must be a short spoken phone call, not a long chat questionnaire. "
+            "Do not interview them about reminder titles or call schedules. "
+            "If they ask to set reminders/calls/updates, tell them that is already "
+            "the commute plan, or they can say 'set up commute'. "
+            "Updates = morning briefing, news, traffic, due reminders. "
+            "Calls = due reminders, plus morning traffic when it looks bad "
+            "(only if Twilio is configured). "
+            "Never claim you sent email. Drafts are not sent until the user confirms. "
+            "Never claim you pushed to GitHub — GitHub tools are read-only. "
+            "Never claim you placed a phone call unless a tool result says so."
         )
         if rolling:
             system += f"\nLong-term conversation notes:\n{rolling}"
@@ -172,6 +219,24 @@ class Orchestrator:
             return "memory"
         if tool_name.startswith("email."):
             return "email"
+        if tool_name.startswith("calendar."):
+            return "calendar"
+        if tool_name.startswith("project."):
+            return "project"
+        if tool_name.startswith("github."):
+            return "github"
+        if tool_name.startswith("docs."):
+            return "docs"
+        if tool_name.startswith("notify."):
+            return "notify"
+        if tool_name.startswith("briefing."):
+            return "briefing"
+        if tool_name.startswith("news."):
+            return "news"
+        if tool_name.startswith("commute."):
+            return "commute"
+        if tool_name.startswith("alert."):
+            return "alert"
         return "orchestrator"
 
     def _format_outcome(self, outcome: GateOutcome) -> str:
@@ -190,8 +255,15 @@ def _planner_prompt(intent: str) -> str:
         "reminder.due, reminder.create, reminder.delete, memory.get, "
         "memory.list, memory.upsert, memory.delete, email.fetch, email.list, "
         "email.get, email.search, email.classify, email.summarize, email.draft, "
-        "email.send. Never send email without a draft; send is confirmation-only. "
-        "task.create payload: title, optional description, priority, due_at. "
+        "email.send, project.list, project.create, project.update, calendar.today, "
+        "calendar.list, calendar.create, calendar.delete, github.repos, github.issues, "
+        "github.pulls, docs.ingest, docs.search, notify.list, notify.read, "
+        "briefing.morning, briefing.evening, news.digest, commute.status, "
+        "commute.traffic, commute.set_city, commute.install, alert.ping. "
+        "If they want commute reminders or call/update schedules, use commute.install. "
+        "Never send email without a draft; send is confirmation-only. "
+        "GitHub tools are read-only. calendar.create payload: title, start_at ISO. "
+        "task.create payload: title, optional description, priority, due_at, project_id. "
         "reminder.create payload: title, trigger_at (ISO datetime), optional "
         "kind (one_time|recurring|deadline), recurrence (daily|weekly), message."
     )
