@@ -19,6 +19,7 @@ _ENV_PATH = PROJECT_ROOT / ".env"
 _DEFAULT_DB_PATH = PROJECT_ROOT / "data" / "jarvis.db"
 _DEFAULT_PROVIDER = "fake"
 _DEFAULT_TIMEOUT = 60.0
+_DEFAULT_SUMMARY_EVERY = 10
 
 
 @dataclass(frozen=True)
@@ -33,6 +34,7 @@ class Settings:
     llm_base_url: str
     llm_model: str
     llm_timeout_seconds: float
+    summary_every_messages: int
     database_path: Path
     env_file_loaded: bool
 
@@ -44,6 +46,18 @@ def _resolve_database_path(raw: str) -> Path:
     if path.is_absolute():
         return path
     return PROJECT_ROOT / path
+
+
+def _parse_positive_int(raw: str, default: int) -> int:
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    if value < 2:
+        return default
+    return value
 
 
 def _parse_timeout(raw: str) -> float:
@@ -83,6 +97,10 @@ def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
         llm_model=os.getenv("JARVIS_LLM_MODEL", "gpt-4o-mini").strip(),
         llm_timeout_seconds=_parse_timeout(
             os.getenv("JARVIS_LLM_TIMEOUT_SECONDS", "").strip()
+        ),
+        summary_every_messages=_parse_positive_int(
+            os.getenv("JARVIS_SUMMARY_EVERY", "").strip(),
+            _DEFAULT_SUMMARY_EVERY,
         ),
         database_path=_resolve_database_path(
             os.getenv("JARVIS_DATABASE_PATH", "").strip()

@@ -52,5 +52,10 @@ pytest
 
 ## Conversation summaries
 
-Chat turns are stored in `conversation_messages`. They are **not** automatically
-summarized into `memories.CONVERSATION_CONTEXT` — that policy is still open.
+After every **10** chat messages (user + assistant), Jarvis writes a rolling
+summary to `memories` category `CONVERSATION_CONTEXT`, key `latest`. Change
+the cadence with `JARVIS_SUMMARY_EVERY` in `.env`. Inspect with:
+
+```bash
+jarvis memory get CONVERSATION_CONTEXT latest
+```
