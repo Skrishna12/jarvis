@@ -81,6 +81,7 @@ def test_help_lists_new_commands(capsys: pytest.CaptureFixture[str]) -> None:
     assert "news" in out
     assert "commute" in out
     assert "phone" in out
+    assert "alexa" in out
     assert "confirm" in out
 
 

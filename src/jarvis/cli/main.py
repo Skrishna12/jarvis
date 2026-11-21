@@ -6,6 +6,7 @@ import argparse
 import sys
 
 from jarvis import __version__
+from jarvis.cli import alexa_cmd
 from jarvis.cli import briefing_cmd
 from jarvis.cli import calendar_cmd
 from jarvis.cli import chat as chat_cmd
@@ -58,6 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
     news_cmd.register(subparsers)
     commute_cmd.register(subparsers)
     phone_cmd.register(subparsers)
+    alexa_cmd.register(subparsers)
     briefing_cmd.register(subparsers)
     confirm_cmd.register(subparsers)
     logs_cmd.register(subparsers)

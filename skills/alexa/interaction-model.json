@@ -1,0 +1,64 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "jarvis",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "TrafficIntent",
+          "samples": [
+            "traffic",
+            "how's traffic",
+            "how is traffic",
+            "commute",
+            "road updates"
+          ]
+        },
+        {
+          "name": "BriefingIntent",
+          "samples": [
+            "morning briefing",
+            "briefing",
+            "brief me",
+            "my update",
+            "what's on today"
+          ]
+        },
+        {
+          "name": "NewsIntent",
+          "samples": [
+            "news",
+            "headlines",
+            "daily news",
+            "what's in the news"
+          ]
+        },
+        {
+          "name": "QueryIntent",
+          "slots": [
+            {
+              "name": "query",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "to {query}",
+            "ask {query}",
+            "tell me {query}"
+          ]
+        }
+      ]
+    }
+  }
+}

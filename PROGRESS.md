@@ -18,6 +18,7 @@ search, in-app notifications, morning/evening briefing.
 - Daily news (India + world + topic RSS) in `news.digest` and morning briefing.
 - Weekday commute 09:00–09:40 / finish 18:30 (IST) plus traffic RSS.
 - Telegram `jarvis phone` so the same orchestrator works from a phone.
+- Alexa custom skill endpoint (`jarvis alexa`) so an Echo can speak replies.
 - Proactive alerts while `jarvis phone` runs: Telegram ping, optional Twilio
   call that speaks the update (due reminders; commute traffic when urgent).
 - CLI: `project`, `calendar`, `github`, `docs`, `notify`, `news`, `commute`,

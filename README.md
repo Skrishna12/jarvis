@@ -54,6 +54,7 @@ jarvis commute traffic
 jarvis news
 jarvis briefing morning
 jarvis phone                 # Telegram; keep this process running
+jarvis alexa                 # Echo speaker; needs ngrok HTTPS + Alexa skill
 jarvis calendar today
 jarvis calendar create "Standup" --start 2026-11-21T09:00:00
 jarvis project create Launch
@@ -71,6 +72,13 @@ Weekdays (Mon–Fri, Asia/Kolkata): leave **09:00**, at work by **09:40**,
 finish **18:30**. Morning/evening briefing includes that plus traffic headlines
 for `JARVIS_COMMUTE_CITY` (or `commute city Hyderabad` in chat). This is news
 about jams/closures, not live Google Maps ETAs.
+
+**Alexa (home Echo):** the speaker is always on, but Jarvis still runs on the
+laptop. `jarvis alexa`, then expose it with HTTPS (ngrok). In the Alexa
+developer console create a custom skill, invocation name `jarvis`, paste
+`skills/alexa/interaction-model.json`, set the endpoint to the ngrok https
+URL. Say: “Alexa, open Jarvis” or “Alexa, ask Jarvis traffic”. The Echo
+cannot wake on the word Jarvis.
 
 **Phone chat:** create a Telegram bot with [@BotFather](https://t.me/BotFather),
 put `JARVIS_TELEGRAM_BOT_TOKEN` in `.env` only, then run `jarvis phone` and
