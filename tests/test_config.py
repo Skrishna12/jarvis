@@ -60,6 +60,7 @@ def test_load_settings_without_env_file(monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.telegram_bot_token == ""
     assert settings.voice_backend == "fake"
     assert settings.alert_call is False
+    assert settings.alert_call_morning is True
 
 
 def test_load_settings_reads_dotenv_file(tmp_path: Path) -> None:

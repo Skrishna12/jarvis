@@ -27,6 +27,15 @@ def test_commute_card_includes_hours() -> None:
     assert "18:30" in text
 
 
+def test_install_commute_reminders_once(db_session) -> None:
+    gate = PermissionGate(db_session, default_registry())
+    first = gate.invoke("commute.install", {}, agent="commute")
+    assert first.status == "ok"
+    assert "Leave for office" in first.message
+    second = gate.invoke("commute.install", {}, agent="commute")
+    assert "already exist" in second.message
+
+
 def test_set_city_and_traffic_tool(db_session) -> None:
     gate = PermissionGate(db_session, default_registry())
     set_city = gate.invoke("commute.set_city", {"city": "Hyderabad"}, agent="commute")

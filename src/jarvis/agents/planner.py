@@ -55,6 +55,10 @@ def plan_from_text(text: str) -> Plan | None:
     stripped = text.strip()
     lower = stripped.lower()
 
+    if "remind" in lower and any(
+        word in lower for word in ("office", "commute", "weekday")
+    ):
+        return Plan("commute.install", {})
     if lower in {"call me", "ping me", "alert me", "ring me"}:
         return Plan("alert.ping", {"text": "Jarvis checking in.", "call": "yes"})
     if lower in {
@@ -65,6 +69,14 @@ def plan_from_text(text: str) -> Plan | None:
         "office commute",
     }:
         return Plan("commute.traffic", {})
+    if lower in {
+        "set up commute",
+        "setup commute",
+        "install commute",
+        "set my commute reminders",
+        "set commute reminders",
+    }:
+        return Plan("commute.install", {})
     if lower in {"news", "headlines", "daily news", "today's news", "todays news"}:
         return Plan("news.digest", {})
     if lower in {"morning briefing", "brief me", "daily briefing", "morning brief"}:

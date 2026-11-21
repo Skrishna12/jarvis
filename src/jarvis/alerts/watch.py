@@ -7,8 +7,8 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from jarvis.commute.schedule import commute_card, is_office_day
-from jarvis.commute.traffic import fetch_traffic, format_traffic
+from jarvis.commute.schedule import is_office_day
+from jarvis.commute.traffic import fetch_traffic
 from jarvis.config import Settings, load_settings
 from jarvis.core.clock import local_now
 from jarvis.memory.errors import MemoryNotFoundError
@@ -64,15 +64,20 @@ def collect_alerts(
     if is_office_day(moment, tz_name=cfg.timezone):
         if _in_morning_window(moment, cfg) and _once(memory, "last_morning_push", moment):
             traffic = fetch_traffic(session=session)
-            urgent = _traffic_urgent(traffic)
-            body = commute_card(session=session, settings=cfg, when=moment)
-            body += "\n" + format_traffic(traffic)
-            spoken = "Jarvis here. Office commute update. " + body.replace("\n", ". ")
-            alerts.append(Alert("morning", "Morning commute", spoken, call=urgent or cfg.alert_call_morning))
+            spoken = _ride_script(
+                "Jarvis. You are about to ride. Leave by nine. In by nine forty.",
+                traffic,
+            )
+            alerts.append(
+                Alert("morning", "Morning ride", spoken, call=True)
+            )
         if _in_evening_window(moment, cfg) and _once(memory, "last_evening_push", moment):
-            body = commute_card(session=session, settings=cfg, when=moment)
-            spoken = f"Jarvis here. Office finishes at {cfg.commute_finish}. {body}"
-            alerts.append(Alert("evening", "Evening wrap", spoken, call=False))
+            traffic = fetch_traffic(session=session)
+            spoken = _ride_script(
+                f"Jarvis. Office is done. Ride home. Finish was {cfg.commute_finish}.",
+                traffic,
+            )
+            alerts.append(Alert("evening", "Evening ride", spoken, call=True))
 
     return alerts
 
@@ -151,3 +156,14 @@ def _traffic_urgent(section) -> bool:
     if section.error:
         return False
     return any(word in blob for word in _TRAFFIC_HIT)
+
+
+def _ride_script(lead: str, section) -> str:
+    """Short enough to hear through a helmet Bluetooth intercom."""
+    if section.error:
+        return f"{lead} Traffic feed unavailable."
+    heads = [h.title.split(" - ")[0].strip() for h in section.headlines[:2]]
+    if not heads:
+        return f"{lead} No traffic headlines."
+    bits = ". ".join(heads)
+    return f"{lead} Traffic: {bits}."

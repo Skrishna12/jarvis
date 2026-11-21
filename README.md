@@ -49,6 +49,7 @@ JARVIS_GITHUB_TOKEN=your-token-not-in-chat
 ```bash
 jarvis chat
 jarvis commute city Hyderabad
+jarvis commute install
 jarvis commute traffic
 jarvis news
 jarvis briefing morning
@@ -74,6 +75,10 @@ about jams/closures, not live Google Maps ETAs.
 **Phone chat:** create a Telegram bot with [@BotFather](https://t.me/BotFather),
 put `JARVIS_TELEGRAM_BOT_TOKEN` in `.env` only, then run `jarvis phone` and
 leave it running. Message the bot anytime. Confirmations still use yes/no.
+
+Commute is a **bike ride with a helmet intercom**. Morning (about 8:40) and
+evening (about 6:25) updates are short spoken calls so they come through
+Bluetooth, not a wall of Telegram text.
 
 **Calls:** Jarvis can ring you and *speak* the update (Twilio). Put
 `JARVIS_VOICE_BACKEND=twilio`, SID, token, from-number, and `JARVIS_VOICE_TO`

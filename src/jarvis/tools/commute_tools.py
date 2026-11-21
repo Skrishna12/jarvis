@@ -5,6 +5,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from jarvis.commute.schedule import commute_card, resolve_city
+from jarvis.commute.setup import FINISH_TITLE, LEAVE_TITLE, install_commute_reminders
 from jarvis.commute.traffic import fetch_traffic, format_traffic
 from jarvis.memory.store import MemoryStore
 from jarvis.security.levels import PermissionLevel
@@ -58,3 +59,31 @@ class CommuteSetCityTool(Tool):
             )
         MemoryStore(session).upsert("USER_PROFILE", "commute_city", city)
         return ToolResult(True, f"I'll use {city} for traffic headlines.", {"city": city})
+
+
+class CommuteInstallTool(Tool):
+    name = "commute.install"
+    description = "Create weekday leave-for-office and office-finishing reminders."
+    agent = "commute"
+    level = PermissionLevel.SAFE
+
+    def run(self, session: Session, payload: dict[str, Any]) -> ToolResult:
+        del payload
+        created = install_commute_reminders(session)
+        card = commute_card(session=session)
+        if not created:
+            return ToolResult(
+                True,
+                "Commute reminders already exist.\n" + card,
+                {"created": [], "titles": [LEAVE_TITLE, FINISH_TITLE]},
+            )
+        return ToolResult(
+            True,
+            "Set weekday reminders: "
+            + ", ".join(created)
+            + ".\n"
+            + card
+            + "\nCalls: due reminders ring you if Twilio is enabled; "
+            "morning traffic can too. News and briefing are updates, not calls.",
+            {"created": created},
+        )

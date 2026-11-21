@@ -185,7 +185,7 @@ def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
         voice_to=os.getenv("JARVIS_VOICE_TO", "").strip(),
         alert_call=_parse_bool(os.getenv("JARVIS_ALERT_CALL", "").strip(), False),
         alert_call_morning=_parse_bool(
-            os.getenv("JARVIS_ALERT_CALL_MORNING", "").strip(), False
+            os.getenv("JARVIS_ALERT_CALL_MORNING", "").strip(), True
         ),
         database_path=_resolve_database_path(
             os.getenv("JARVIS_DATABASE_PATH", "").strip()

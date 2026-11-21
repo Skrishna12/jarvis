@@ -16,6 +16,7 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     city = sub.add_parser("city")
     city.add_argument("name")
     city.set_defaults(handler=lambda a: _run("commute.set_city", {"city": a.name}))
+    sub.add_parser("install").set_defaults(handler=lambda _a: _run("commute.install", {}))
 
 
 def _run(tool: str, payload: dict) -> int:

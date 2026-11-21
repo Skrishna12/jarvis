@@ -31,6 +31,9 @@ def test_weekday_morning_commute_alert_once(db_session) -> None:
     first = collect_alerts(db_session, settings, now=morning)
     kinds = [a.kind for a in first]
     assert "morning" in kinds
+    morning_alert = next(a for a in first if a.kind == "morning")
+    assert morning_alert.call is True
+    assert "ride" in morning_alert.body.lower()
     second = collect_alerts(db_session, settings, now=morning)
     assert "morning" not in [a.kind for a in second]
 
