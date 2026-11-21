@@ -4,50 +4,37 @@ Read this file at the start of every session before changing code.
 
 ## Current milestone
 
-**Phase 1–2** including rolling conversation summaries. Email/calendar/GitHub/
-voice/RAG remain out of scope.
+**Email agent** (IMAP/SMTP or fake backend). Send is always permission level 2.
 
-## What was built (M4–M7)
+## What was built (email)
 
-- Permission levels 0–3. Tools declare a level. Level 2+ stores a pending
-  confirmation and waits for `yes` / `jarvis confirm approve`.
-- `action_logs` for every tool attempt (timestamp, agent, action, level,
-  redacted payload, result).
-- Task agent/tools: create, update, complete, prioritize, subtasks, delete.
-- Reminder agent/tools: one-time, recurring (`daily`/`weekly`), deadline
-  (optional task link), due-check that rolls recurring times forward.
-- Orchestrator: heuristic intent + rule planner (works with FakeProvider) and
-  JSON planner when a real LLM replies with a tool object.
-- `jarvis chat` loop; conversation rows persisted; **no auto-summarization**.
+- Local `emails` cache (SQLite) plus `email.fetch` from a mailbox adapter.
+- Default `JARVIS_EMAIL_BACKEND=fake` (in-memory inbox, no network).
+- `imap` backend: IMAP fetch + SMTP send; credentials only in `.env`.
+- Tools: fetch, list, get, search, classify, summarize, draft, send.
+- Categories: Job, Work, Interview, Education, Finance, Bills, Orders,
+  Personal, Notifications, Other. Urgency: low / normal / urgent.
+- Heuristic classify + ISO-date deadline hints (e.g. interviews).
+- **Never sends without confirmation.** Draft is level 1; send is level 2.
 
-## What was built (M1–M3)
+## Earlier (Phase 1–2)
 
-- Package, dotenv config, SQLite memory/conversation, LLM interface
-  (`generate` / `stream` / `classify`), Fake + OpenAI-compatible providers.
+Orchestrator, tasks, reminders, memory, permissions, action log, rolling
+`CONVERSATION_CONTEXT` summaries, CLI chat.
 
-## Key decisions (M4–M7)
+## Key decisions (email)
 
-- **`jarvis memory` uses the permission gate** — set is level 1; delete is
-  level 2 and needs confirmation (same as chat/tools). There is no ungated
-  delete path in the CLI.
-- **Chat due briefing** — starting `jarvis chat` (including `--once`) runs
-  `reminder.due` and prints overdue items if any. One-time reminders are
-  marked fired; recurring ones roll forward. No background daemon.
-- **Heuristic planner + LLM JSON** — FakeProvider cannot emit tool JSON, so
-  obvious phrases (`create a task …`) are parsed locally. A real model can
-  still return `{"tool","payload"}`.
-- **Rolling CONVERSATION_CONTEXT summaries every 10 messages** — `--once`
-  has no session end, so we summarize on a count, not on quit. FakeProvider
-  uses an extractive “Recent: …” fallback; a real model gets a summary prompt.
-  Chat replies still include the last ~12 raw turns plus the rolling notes.
-- **Level 3 reserved** — the gate treats it like level 2 (must confirm). No
-  default tool is registered at level 3.
-- **Secrets** — still only in `.env`. Action logs redact keys named
-  api_key/token/password/secret/authorization.
+- **IMAP/SMTP instead of Gmail OAuth for this slice** — OAuth needs a Google
+  Cloud app and a redirect URL. An app password in `.env` is enough for a
+  personal CLI. OAuth can replace the transport later without changing tools.
+- **Fake backend by default** — tests and first-run never touch a real inbox.
+- **Reply goes to `From:`** with subject `Re: …` using the saved draft only.
+
+## Secrets
+
+Email password lives only in local `.env`. Status prints address **set/not
+set**, never the password. Action logs already redact `password`.
 
 ## What's next
 
-Phase 1–2 leftovers: a real LLM key is optional (your `.env` only).
-
-Later phases from the long-term vision (email, calendar, GitHub, RAG, voice)
-only after an explicit green light and a brief update.
+Calendar, then GitHub/projects, RAG, voice — only after you green-light them.

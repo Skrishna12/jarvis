@@ -1,10 +1,9 @@
 # Jarvis
 
-Personal CLI assistant. **Phase 1–2** is in: chat orchestrator, task and
-reminder agents, permission levels, action log, SQLite memory.
+Personal CLI assistant: chat orchestrator, tasks, reminders, memory, and
+**email** (draft always; send only after you confirm).
 
-Out of scope (later): email, calendar, GitHub, voice, mobile, RAG, computer
-control, proactive suggestions.
+Out of scope (later): calendar, GitHub, voice, mobile, RAG, computer control.
 
 ## Setup
 
@@ -16,46 +15,36 @@ cp .env.example .env
 jarvis db upgrade
 ```
 
-`.env` is gitignored. Default `JARVIS_LLM_PROVIDER=fake` needs no API key.
-Set `openai_compatible` and `JARVIS_LLM_API_KEY` only in `.env` if you want a
-real model. Never put a real key in `.env.example`.
+`.env` is gitignored. Default `JARVIS_LLM_PROVIDER=fake` and
+`JARVIS_EMAIL_BACKEND=fake` need no accounts.
 
-## Try it
+To use a real inbox (IMAP/SMTP), set in **your** `.env` only — never in chat
+or `.env.example`:
 
-```bash
-jarvis chat
-# or one shot:
-jarvis chat --once "create a task buy milk"
-jarvis task list
-jarvis reminder create "standup" --at 2026-10-25T09:00:00
-jarvis log
+```
+JARVIS_EMAIL_BACKEND=imap
+JARVIS_EMAIL_ADDRESS=you@gmail.com
+JARVIS_EMAIL_PASSWORD=app-password-not-your-login-password
 ```
 
-Deletes (tasks, reminders, memories) need confirmation (level 2):
+Gmail: enable 2FA and create an [app password](https://support.google.com/accounts/answer/185833).
+
+## Email
 
 ```bash
-jarvis task delete <id>
-jarvis memory delete USER_PROFILE preferred_name
-jarvis confirm list
+jarvis email fetch
+jarvis email list
+jarvis email get <id>
+jarvis email summarize <id>
+jarvis email draft <id>          # saves a reply, does not send
+jarvis email send <id>           # asks for confirmation
 jarvis confirm approve <pending-id>
-# in chat, type yes or no
 ```
 
-Starting chat also prints any **due reminders** (then marks one-time items done
-and rolls recurring ones forward). There is no background notifier.
+Chat: `check inbox`, `list emails`. Send still requires `yes` / confirm.
 
 ## Tests
 
 ```bash
 pytest
-```
-
-## Conversation summaries
-
-After every **10** chat messages (user + assistant), Jarvis writes a rolling
-summary to `memories` category `CONVERSATION_CONTEXT`, key `latest`. Change
-the cadence with `JARVIS_SUMMARY_EVERY` in `.env`. Inspect with:
-
-```bash
-jarvis memory get CONVERSATION_CONTEXT latest
 ```

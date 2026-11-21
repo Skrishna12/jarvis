@@ -10,6 +10,14 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from jarvis.db.engine import make_engine
 from jarvis.db.models import Base
+from jarvis.email.fake import reset_fake_mailbox
+
+
+@pytest.fixture(autouse=True)
+def _clean_fake_mailbox() -> Iterator[None]:
+    reset_fake_mailbox()
+    yield
+    reset_fake_mailbox()
 
 
 @pytest.fixture

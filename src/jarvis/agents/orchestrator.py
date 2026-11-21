@@ -15,7 +15,7 @@ from jarvis.memory.summarize import ConversationSummarizer
 from jarvis.security.gate import GateOutcome, PermissionGate
 from jarvis.tools.catalog import default_registry
 
-_INTENTS = ("CHAT", "TASK", "REMINDER", "MEMORY", "CONFIRM")
+_INTENTS = ("CHAT", "TASK", "REMINDER", "MEMORY", "EMAIL", "CONFIRM")
 _YES = {"yes", "y", "ok", "okay", "approve", "confirm"}
 _NO = {"no", "n", "cancel", "deny", "nope"}
 
@@ -104,6 +104,8 @@ class Orchestrator:
 
     def _intent(self, text: str) -> str:
         lower = text.lower()
+        if any(word in lower for word in ("email", "inbox", "mailbox")):
+            return "EMAIL"
         if any(word in lower for word in ("remind", "reminder", "alarm")):
             return "REMINDER"
         if any(word in lower for word in ("task", "todo", "subtask")):
@@ -142,8 +144,8 @@ class Orchestrator:
         rolling = self._summarizer.latest()
         system = (
             "You are Jarvis, a personal CLI assistant. Be brief. "
-            "You can manage tasks and reminders when asked. "
-            "Do not claim you sent email or changed files."
+            "You can manage tasks, reminders, and email when asked. "
+            "Never claim you sent email. Drafts are not sent until the user confirms."
         )
         if rolling:
             system += f"\nLong-term conversation notes:\n{rolling}"
@@ -168,6 +170,8 @@ class Orchestrator:
             return "reminder"
         if tool_name.startswith("memory."):
             return "memory"
+        if tool_name.startswith("email."):
+            return "email"
         return "orchestrator"
 
     def _format_outcome(self, outcome: GateOutcome) -> str:
@@ -184,7 +188,9 @@ def _planner_prompt(intent: str) -> str:
         "Tools: task.list, task.get, task.create, task.update, task.complete, "
         "task.prioritize, task.add_subtask, task.delete, reminder.list, "
         "reminder.due, reminder.create, reminder.delete, memory.get, "
-        "memory.list, memory.upsert, memory.delete. "
+        "memory.list, memory.upsert, memory.delete, email.fetch, email.list, "
+        "email.get, email.search, email.classify, email.summarize, email.draft, "
+        "email.send. Never send email without a draft; send is confirmation-only. "
         "task.create payload: title, optional description, priority, due_at. "
         "reminder.create payload: title, trigger_at (ISO datetime), optional "
         "kind (one_time|recurring|deadline), recurrence (daily|weekly), message."

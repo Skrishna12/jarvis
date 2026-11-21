@@ -74,6 +74,7 @@ def test_help_lists_new_commands(capsys: pytest.CaptureFixture[str]) -> None:
     assert "llm" in out
     assert "chat" in out
     assert "task" in out
+    assert "email" in out
     assert "confirm" in out
 
 
@@ -133,3 +134,19 @@ def test_chat_once_prints_due_reminder(
     out = capsys.readouterr().out
     assert "overdue ping" in out
     assert "Due now" in out
+
+
+def test_email_fetch_draft_and_confirm_send(
+    isolated_db: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from jarvis.email.fake import sample_message, seed_inbox, sent_messages
+
+    monkeypatch.setenv("JARVIS_EMAIL_BACKEND", "fake")
+    seed_inbox([sample_message()])
+    assert main(["db", "upgrade"]) == 0
+    assert main(["email", "fetch"]) == 0
+    assert main(["email", "list"]) == 0
+    listed = capsys.readouterr().out
+    assert "Interview" in listed
+    assert main(["chat", "--once", "check inbox"]) == 0
+    assert sent_messages() == []

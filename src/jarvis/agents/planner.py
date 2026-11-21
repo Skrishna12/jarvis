@@ -55,6 +55,42 @@ def plan_from_text(text: str) -> Plan | None:
     stripped = text.strip()
     lower = stripped.lower()
 
+    if lower in {"list emails", "show emails", "inbox", "list inbox"}:
+        return Plan("email.list", {})
+    if lower in {
+        "check email",
+        "check inbox",
+        "fetch email",
+        "fetch emails",
+        "fetch inbox",
+    }:
+        return Plan("email.fetch", {"limit": 20})
+
+    match = re.search(
+        r"\b(?:summarize|summary)\b.{0,20}\bemail\b.{0,20}\b(" + _UUID + r")\b",
+        stripped,
+        re.I,
+    )
+    if match:
+        return Plan("email.summarize", {"id": match.group(1)})
+    match = re.search(
+        r"\bdraft\b.{0,20}\b(?:reply|email)\b.{0,20}\b(" + _UUID + r")\b",
+        stripped,
+        re.I,
+    )
+    if match:
+        return Plan("email.draft", {"id": match.group(1)})
+    match = re.search(
+        r"\bsend\b.{0,20}\b(?:email|reply)\b.{0,20}\b(" + _UUID + r")\b",
+        stripped,
+        re.I,
+    )
+    if match:
+        return Plan("email.send", {"id": match.group(1)})
+    match = re.search(r"\bsearch email(?:s)?\b[:\s-]*(.+)$", stripped, re.I)
+    if match:
+        return Plan("email.search", {"query": match.group(1).strip()})
+
     if lower in {"list tasks", "show tasks", "tasks", "what are my tasks"}:
         return Plan("task.list", {})
     if lower in {"list reminders", "show reminders", "reminders"}:

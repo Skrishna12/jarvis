@@ -17,6 +17,9 @@ _ENV_KEYS = (
     "JARVIS_LLM_TIMEOUT_SECONDS",
     "JARVIS_DATABASE_PATH",
     "JARVIS_SUMMARY_EVERY",
+    "JARVIS_EMAIL_BACKEND",
+    "JARVIS_EMAIL_ADDRESS",
+    "JARVIS_EMAIL_PASSWORD",
 )
 
 
@@ -42,6 +45,7 @@ def test_load_settings_without_env_file(monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.llm_provider == "fake"
     assert settings.llm_timeout_seconds == 60.0
     assert settings.summary_every_messages == 10
+    assert settings.email_backend == "fake"
 
 
 def test_load_settings_reads_dotenv_file(tmp_path: Path) -> None:
