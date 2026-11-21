@@ -5,6 +5,8 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from jarvis.calendar.store import CalendarStore
+from jarvis.commute.schedule import commute_card
+from jarvis.commute.traffic import fetch_traffic, format_traffic
 from jarvis.email.store import EmailStore
 from jarvis.news.feeds import fetch_digest, format_digest
 from jarvis.notify.store import NotificationStore
@@ -30,7 +32,9 @@ class BriefingMorningTool(Tool):
         tasks = [t for t in TaskStore(session).list(status="open") if t.priority == "high"]
         notices = NotificationStore(session).unread()
         mail = EmailStore(session).list(limit=5)
-        sections: list[str] = ["Morning briefing"]
+        sections: list[str] = ["Morning briefing", commute_card(session=session)]
+        traffic = fetch_traffic(session=session)
+        sections.append(format_traffic(traffic))
         if due:
             sections.append("Due: " + ", ".join(r.title for r in due))
         else:
@@ -80,7 +84,9 @@ class BriefingEveningTool(Tool):
         del payload
         open_tasks = TaskStore(session).list(status="open")
         notices = NotificationStore(session).unread()
-        lines = ["Evening wrap-up"]
+        lines = ["Evening wrap-up", commute_card(session=session)]
+        traffic = fetch_traffic(session=session)
+        lines.append(format_traffic(traffic))
         if open_tasks:
             lines.append("Still open: " + ", ".join(t.title for t in open_tasks[:10]))
         else:

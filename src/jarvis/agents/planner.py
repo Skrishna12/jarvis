@@ -55,6 +55,14 @@ def plan_from_text(text: str) -> Plan | None:
     stripped = text.strip()
     lower = stripped.lower()
 
+    if lower in {
+        "traffic",
+        "how's traffic",
+        "hows traffic",
+        "commute",
+        "office commute",
+    }:
+        return Plan("commute.traffic", {})
     if lower in {"news", "headlines", "daily news", "today's news", "todays news"}:
         return Plan("news.digest", {})
     if lower in {"morning briefing", "brief me", "daily briefing", "morning brief"}:
@@ -71,6 +79,14 @@ def plan_from_text(text: str) -> Plan | None:
         return Plan("github.repos", {})
     if lower in {"notifications", "unread notifications", "list notifications"}:
         return Plan("notify.list", {})
+
+    match = re.search(
+        r"\b(?:commute city|set commute city|my city is|i live in)\b[:\s-]*(.+)$",
+        stripped,
+        re.I,
+    )
+    if match:
+        return Plan("commute.set_city", {"city": match.group(1).strip().rstrip(".")})
 
     match = re.search(r"\b(?:create|add|new)\b.{0,20}\bproject\b[:\s-]*(.+)$", stripped, re.I)
     if match:

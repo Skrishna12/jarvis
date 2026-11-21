@@ -28,6 +28,10 @@ _DEFAULT_NEWS_WORLD = (
     "?hl=en-IN&gl=IN&ceid=IN:en"
 )
 _DEFAULT_NEWS_PER_SECTION = 6
+_DEFAULT_TIMEZONE = "Asia/Kolkata"
+_DEFAULT_LEAVE = "09:00"
+_DEFAULT_ARRIVE = "09:40"
+_DEFAULT_FINISH = "18:30"
 
 
 @dataclass(frozen=True)
@@ -55,6 +59,13 @@ class Settings:
     news_national_feed: str
     news_world_feed: str
     news_per_section: int
+    timezone: str
+    commute_city: str
+    commute_leave: str
+    commute_arrive: str
+    commute_finish: str
+    telegram_bot_token: str
+    telegram_chat_id: str
     database_path: Path
     env_file_loaded: bool
 
@@ -147,6 +158,13 @@ def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
             os.getenv("JARVIS_NEWS_PER_SECTION", "").strip(),
             _DEFAULT_NEWS_PER_SECTION,
         ),
+        timezone=(os.getenv("JARVIS_TIMEZONE", "").strip() or _DEFAULT_TIMEZONE),
+        commute_city=os.getenv("JARVIS_COMMUTE_CITY", "").strip(),
+        commute_leave=(os.getenv("JARVIS_COMMUTE_LEAVE", "").strip() or _DEFAULT_LEAVE),
+        commute_arrive=(os.getenv("JARVIS_COMMUTE_ARRIVE", "").strip() or _DEFAULT_ARRIVE),
+        commute_finish=(os.getenv("JARVIS_COMMUTE_FINISH", "").strip() or _DEFAULT_FINISH),
+        telegram_bot_token=os.getenv("JARVIS_TELEGRAM_BOT_TOKEN", "").strip(),
+        telegram_chat_id=os.getenv("JARVIS_TELEGRAM_CHAT_ID", "").strip(),
         database_path=_resolve_database_path(
             os.getenv("JARVIS_DATABASE_PATH", "").strip()
         ),

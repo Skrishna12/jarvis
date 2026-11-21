@@ -73,3 +73,5 @@ def test_morning_briefing_chat(db_session) -> None:
     assert "Pay rent" in result.reply
     assert "Daily news" in result.reply
     assert "India story" in result.reply
+    assert "18:30" in result.reply
+    assert "Jam on the ring road" in result.reply

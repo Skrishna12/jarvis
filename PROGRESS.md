@@ -16,7 +16,10 @@ search, in-app notifications, morning/evening briefing.
 - Local document ingest + keyword search (markdown/text/code, no embeddings).
 - Unread `notifications` plus `briefing.morning` / `briefing.evening`.
 - Daily news (India + world + topic RSS) in `news.digest` and morning briefing.
-- CLI: `project`, `calendar`, `github`, `docs`, `notify`, `news`, `briefing`.
+- Weekday commute 09:00–09:40 / finish 18:30 (IST) plus traffic RSS.
+- Telegram `jarvis phone` so the same orchestrator works from a phone.
+- CLI: `project`, `calendar`, `github`, `docs`, `notify`, `news`, `commute`,
+  `phone`, `briefing`.
 
 ## Earlier
 
@@ -30,7 +33,8 @@ always level 2).
 - **Docs search is keyword, not embeddings.** Good enough for a personal CLI
   without a vector DB.
 - **Calendar is local SQLite**, not Google Calendar OAuth.
-- Voice, mobile, web dashboard, and computer control stay out of scope.
+- Voice, native mobile apps, web dashboard, and computer control stay out of
+  scope. Phone access is Telegram, not an App Store app.
 
 ## Secrets
 

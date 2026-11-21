@@ -29,6 +29,10 @@ def print_status() -> None:
     token_state = "set" if settings.github_token else "not set"
     print(f"  JARVIS_GITHUB_BACKEND: {settings.github_backend}")
     print(f"  JARVIS_GITHUB_TOKEN: {token_state}")
+    tg_state = "set" if settings.telegram_bot_token else "not set"
+    print(f"  JARVIS_TIMEZONE: {settings.timezone}")
+    print(f"  commute: {settings.commute_leave}–{settings.commute_arrive}, done {settings.commute_finish}")
+    print(f"  JARVIS_TELEGRAM_BOT_TOKEN: {tg_state}")
     print(f"  database: {db_path} ({db_state})")
     print("  chat: jarvis chat   (type yes/no to confirm level-2 actions)")
     print("  email send always asks first")

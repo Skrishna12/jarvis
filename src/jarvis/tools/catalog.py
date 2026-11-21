@@ -34,6 +34,7 @@ from jarvis.tools.calendar_tools import (
 )
 from jarvis.tools.docs_tools import DocsIngestTool, DocsSearchTool
 from jarvis.tools.github_tools import GitHubIssuesTool, GitHubPullsTool, GitHubReposTool
+from jarvis.tools.commute_tools import CommuteSetCityTool, CommuteStatusTool, CommuteTrafficTool
 from jarvis.tools.news_tools import NewsDigestTool
 from jarvis.tools.notify_tools import NotifyListTool, NotifyReadTool
 from jarvis.tools.project_tools import ProjectCreateTool, ProjectListTool, ProjectUpdateTool
@@ -91,6 +92,9 @@ def default_registry() -> ToolRegistry:
         NotifyListTool(),
         NotifyReadTool(),
         NewsDigestTool(),
+        CommuteStatusTool(),
+        CommuteTrafficTool(),
+        CommuteSetCityTool(),
         BriefingMorningTool(),
         BriefingEveningTool(),
     ):

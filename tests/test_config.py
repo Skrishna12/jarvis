@@ -53,6 +53,11 @@ def test_load_settings_without_env_file(monkeypatch: pytest.MonkeyPatch) -> None
     assert "news.google.com" in settings.news_national_feed
     assert "WORLD" in settings.news_world_feed
     assert settings.news_per_section == 6
+    assert settings.timezone == "Asia/Kolkata"
+    assert settings.commute_leave == "09:00"
+    assert settings.commute_arrive == "09:40"
+    assert settings.commute_finish == "18:30"
+    assert settings.telegram_bot_token == ""
 
 
 def test_load_settings_reads_dotenv_file(tmp_path: Path) -> None:

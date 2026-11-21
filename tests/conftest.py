@@ -41,6 +41,16 @@ def _stub_news_digest(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("jarvis.tools.briefing_tools.fetch_digest", fake_digest)
     monkeypatch.setattr("jarvis.tools.news_tools.fetch_digest", fake_digest)
 
+    def fake_traffic(**_kwargs) -> NewsSection:
+        return NewsSection(
+            "Traffic (Test)",
+            [Headline("Jam on the ring road", "https://example.test/t", "Traffic")],
+        )
+
+    monkeypatch.setattr("jarvis.commute.traffic.fetch_traffic", fake_traffic)
+    monkeypatch.setattr("jarvis.tools.briefing_tools.fetch_traffic", fake_traffic)
+    monkeypatch.setattr("jarvis.tools.commute_tools.fetch_traffic", fake_traffic)
+
 
 @pytest.fixture
 def db_session(tmp_path: Path) -> Iterator[Session]:

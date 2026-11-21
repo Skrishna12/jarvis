@@ -5,7 +5,8 @@ calendar, projects, local doc search, daily news, and **read-only GitHub**.
 
 Email send always waits for confirmation. GitHub tools never write.
 
-Out of scope: voice, mobile, web dashboard, computer control.
+Out of scope: native iOS/Android apps, voice, web dashboard, computer control.
+Phone chat is Telegram (`jarvis phone`), not a separate mobile app.
 
 ## Setup
 
@@ -47,8 +48,11 @@ JARVIS_GITHUB_TOKEN=your-token-not-in-chat
 
 ```bash
 jarvis chat
+jarvis commute city Hyderabad
+jarvis commute traffic
 jarvis news
 jarvis briefing morning
+jarvis phone                 # Telegram; keep this process running
 jarvis calendar today
 jarvis calendar create "Standup" --start 2026-11-21T09:00:00
 jarvis project create Launch
@@ -59,8 +63,17 @@ jarvis email fetch
 jarvis email send <id>          # confirmation required
 ```
 
-Chat phrases: `morning briefing`, `news`, `calendar today`, `list projects`,
-`check inbox`, `list tasks`.
+Chat phrases: `morning briefing`, `traffic`, `news`, `calendar today`,
+`list projects`, `check inbox`, `list tasks`.
+
+Weekdays (Mon–Fri, Asia/Kolkata): leave **09:00**, at work by **09:40**,
+finish **18:30**. Morning/evening briefing includes that plus traffic headlines
+for `JARVIS_COMMUTE_CITY` (or `commute city Hyderabad` in chat). This is news
+about jams/closures, not live Google Maps ETAs.
+
+**Phone:** create a Telegram bot with [@BotFather](https://t.me/BotFather), put
+`JARVIS_TELEGRAM_BOT_TOKEN` in `.env` only, then run `jarvis phone` and leave
+it running. Message the bot from your phone. Confirmations still use yes/no.
 
 Morning briefing includes India + world headlines (plus business, tech, sports,
 science, health, entertainment) from public RSS. No extra API key. There is no

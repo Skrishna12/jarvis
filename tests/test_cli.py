@@ -79,6 +79,8 @@ def test_help_lists_new_commands(capsys: pytest.CaptureFixture[str]) -> None:
     assert "github" in out
     assert "briefing" in out
     assert "news" in out
+    assert "commute" in out
+    assert "phone" in out
     assert "confirm" in out
 
 
