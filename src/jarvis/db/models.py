@@ -90,6 +90,29 @@ class ActionLog(Base):
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
+class Email(Base):
+    __tablename__ = "emails"
+    __table_args__ = (
+        UniqueConstraint("internet_id", name="uq_emails_internet_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    internet_id: Mapped[str] = mapped_column(String(512), nullable=False)
+    from_addr: Mapped[str] = mapped_column(String(512), nullable=False)
+    to_addr: Mapped[str] = mapped_column(String(512), nullable=False)
+    subject: Mapped[str] = mapped_column(String(512), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    received_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    category: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    urgency: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    deadline_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    draft_reply: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
 class PendingConfirmation(Base):
     __tablename__ = "pending_confirmations"
 

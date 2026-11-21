@@ -15,7 +15,7 @@ def test_upgrade_creates_tables_and_revision(tmp_path: Path) -> None:
     upgrade_head(db_path)
 
     assert db_path.is_file()
-    assert current_revision(db_path) == "003_m5_m6_work"
+    assert current_revision(db_path) == "004_email"
 
     engine = make_engine(db_path)
     try:
@@ -29,4 +29,5 @@ def test_upgrade_creates_tables_and_revision(tmp_path: Path) -> None:
     assert "pending_confirmations" in names
     assert "tasks" in names
     assert "reminders" in names
+    assert "emails" in names
     assert "alembic_version" in names

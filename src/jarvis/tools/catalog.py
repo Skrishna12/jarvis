@@ -15,6 +15,16 @@ from jarvis.tools.reminder_tools import (
     ReminderDueTool,
     ReminderListTool,
 )
+from jarvis.tools.email_tools import (
+    EmailClassifyTool,
+    EmailDraftTool,
+    EmailFetchTool,
+    EmailGetTool,
+    EmailListTool,
+    EmailSearchTool,
+    EmailSendTool,
+    EmailSummarizeTool,
+)
 from jarvis.tools.task_tools import (
     TaskAddSubtaskTool,
     TaskCompleteTool,
@@ -46,6 +56,14 @@ def default_registry() -> ToolRegistry:
         ReminderDueTool(),
         ReminderCreateTool(),
         ReminderDeleteTool(),
+        EmailFetchTool(),
+        EmailListTool(),
+        EmailGetTool(),
+        EmailSearchTool(),
+        EmailClassifyTool(),
+        EmailSummarizeTool(),
+        EmailDraftTool(),
+        EmailSendTool(),
     ):
         registry.register(tool)
     return registry

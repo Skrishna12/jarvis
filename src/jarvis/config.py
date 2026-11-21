@@ -35,6 +35,13 @@ class Settings:
     llm_model: str
     llm_timeout_seconds: float
     summary_every_messages: int
+    email_backend: str
+    email_address: str
+    email_password: str
+    email_imap_host: str
+    email_imap_port: int
+    email_smtp_host: str
+    email_smtp_port: int
     database_path: Path
     env_file_loaded: bool
 
@@ -101,6 +108,17 @@ def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
         summary_every_messages=_parse_positive_int(
             os.getenv("JARVIS_SUMMARY_EVERY", "").strip(),
             _DEFAULT_SUMMARY_EVERY,
+        ),
+        email_backend=(os.getenv("JARVIS_EMAIL_BACKEND", "fake").strip().lower() or "fake"),
+        email_address=os.getenv("JARVIS_EMAIL_ADDRESS", "").strip(),
+        email_password=os.getenv("JARVIS_EMAIL_PASSWORD", "").strip(),
+        email_imap_host=os.getenv("JARVIS_EMAIL_IMAP_HOST", "imap.gmail.com").strip(),
+        email_imap_port=_parse_positive_int(
+            os.getenv("JARVIS_EMAIL_IMAP_PORT", "").strip(), 993
+        ),
+        email_smtp_host=os.getenv("JARVIS_EMAIL_SMTP_HOST", "smtp.gmail.com").strip(),
+        email_smtp_port=_parse_positive_int(
+            os.getenv("JARVIS_EMAIL_SMTP_PORT", "").strip(), 587
         ),
         database_path=_resolve_database_path(
             os.getenv("JARVIS_DATABASE_PATH", "").strip()
