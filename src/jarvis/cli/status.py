@@ -33,6 +33,10 @@ def print_status() -> None:
     print(f"  JARVIS_TIMEZONE: {settings.timezone}")
     print(f"  commute: {settings.commute_leave}–{settings.commute_arrive}, done {settings.commute_finish}")
     print(f"  JARVIS_TELEGRAM_BOT_TOKEN: {tg_state}")
+    voice_to = "set" if settings.voice_to else "not set"
+    print(f"  JARVIS_VOICE_BACKEND: {settings.voice_backend}")
+    print(f"  JARVIS_VOICE_TO: {voice_to}")
+    print(f"  JARVIS_ALERT_CALL: {settings.alert_call}")
     print(f"  database: {db_path} ({db_state})")
     print("  chat: jarvis chat   (type yes/no to confirm level-2 actions)")
     print("  email send always asks first")

@@ -29,6 +29,7 @@ _INTENTS = (
     "BRIEFING",
     "NEWS",
     "COMMUTE",
+    "ALERT",
     "CONFIRM",
 )
 _YES = {"yes", "y", "ok", "okay", "approve", "confirm"}
@@ -119,6 +120,8 @@ class Orchestrator:
 
     def _intent(self, text: str) -> str:
         lower = text.lower()
+        if any(word in lower for word in ("call me", "ring me", "alert me", "ping me")):
+            return "ALERT"
         if any(word in lower for word in ("traffic", "commute", "office hours")):
             return "COMMUTE"
         if any(word in lower for word in ("news", "headline", "headlines")):
@@ -221,6 +224,8 @@ class Orchestrator:
             return "news"
         if tool_name.startswith("commute."):
             return "commute"
+        if tool_name.startswith("alert."):
+            return "alert"
         return "orchestrator"
 
     def _format_outcome(self, outcome: GateOutcome) -> str:
@@ -243,7 +248,7 @@ def _planner_prompt(intent: str) -> str:
         "calendar.list, calendar.create, calendar.delete, github.repos, github.issues, "
         "github.pulls, docs.ingest, docs.search, notify.list, notify.read, "
         "briefing.morning, briefing.evening, news.digest, commute.status, "
-        "commute.traffic, commute.set_city. "
+        "commute.traffic, commute.set_city, alert.ping. "
         "Never send email without a draft; send is confirmation-only. "
         "GitHub tools are read-only. calendar.create payload: title, start_at ISO. "
         "task.create payload: title, optional description, priority, due_at, project_id. "

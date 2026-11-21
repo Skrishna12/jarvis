@@ -66,6 +66,13 @@ class Settings:
     commute_finish: str
     telegram_bot_token: str
     telegram_chat_id: str
+    voice_backend: str
+    twilio_account_sid: str
+    twilio_auth_token: str
+    twilio_from: str
+    voice_to: str
+    alert_call: bool
+    alert_call_morning: bool
     database_path: Path
     env_file_loaded: bool
 
@@ -89,6 +96,12 @@ def _parse_positive_int(raw: str, default: int) -> int:
     if value < 2:
         return default
     return value
+
+
+def _parse_bool(raw: str, default: bool) -> bool:
+    if not raw:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _parse_timeout(raw: str) -> float:
@@ -165,6 +178,15 @@ def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
         commute_finish=(os.getenv("JARVIS_COMMUTE_FINISH", "").strip() or _DEFAULT_FINISH),
         telegram_bot_token=os.getenv("JARVIS_TELEGRAM_BOT_TOKEN", "").strip(),
         telegram_chat_id=os.getenv("JARVIS_TELEGRAM_CHAT_ID", "").strip(),
+        voice_backend=(os.getenv("JARVIS_VOICE_BACKEND", "fake").strip().lower() or "fake"),
+        twilio_account_sid=os.getenv("JARVIS_TWILIO_ACCOUNT_SID", "").strip(),
+        twilio_auth_token=os.getenv("JARVIS_TWILIO_AUTH_TOKEN", "").strip(),
+        twilio_from=os.getenv("JARVIS_TWILIO_FROM", "").strip(),
+        voice_to=os.getenv("JARVIS_VOICE_TO", "").strip(),
+        alert_call=_parse_bool(os.getenv("JARVIS_ALERT_CALL", "").strip(), False),
+        alert_call_morning=_parse_bool(
+            os.getenv("JARVIS_ALERT_CALL_MORNING", "").strip(), False
+        ),
         database_path=_resolve_database_path(
             os.getenv("JARVIS_DATABASE_PATH", "").strip()
         ),

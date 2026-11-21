@@ -55,6 +55,8 @@ def plan_from_text(text: str) -> Plan | None:
     stripped = text.strip()
     lower = stripped.lower()
 
+    if lower in {"call me", "ping me", "alert me", "ring me"}:
+        return Plan("alert.ping", {"text": "Jarvis checking in.", "call": "yes"})
     if lower in {
         "traffic",
         "how's traffic",

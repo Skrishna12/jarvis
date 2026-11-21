@@ -11,14 +11,17 @@ from sqlalchemy.orm import Session, sessionmaker
 from jarvis.db.engine import make_engine
 from jarvis.db.models import Base
 from jarvis.email.fake import reset_fake_mailbox
+from jarvis.voice.gateway import reset_fake_calls
 from jarvis.news.feeds import Headline, NewsSection
 
 
 @pytest.fixture(autouse=True)
 def _clean_fake_mailbox() -> Iterator[None]:
     reset_fake_mailbox()
+    reset_fake_calls()
     yield
     reset_fake_mailbox()
+    reset_fake_calls()
 
 
 @pytest.fixture(autouse=True)

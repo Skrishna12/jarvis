@@ -5,7 +5,15 @@ from __future__ import annotations
 import json
 from typing import Any
 
-_REDACT_KEYS = {"api_key", "token", "password", "secret", "authorization"}
+_REDACT_KEYS = {
+    "api_key",
+    "token",
+    "password",
+    "secret",
+    "authorization",
+    "auth_token",
+    "account_sid",
+}
 
 
 def dumps(payload: dict[str, Any]) -> str:

@@ -5,14 +5,17 @@ The laptop/cloud process must keep running. Jarvis is not a separate mobile app.
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 import httpx
 
 from jarvis.agents.orchestrator import Orchestrator
+from jarvis.alerts.watch import collect_alerts, deliver_alerts
 from jarvis.config import Settings
 from jarvis.llm.factory import build_provider
 from jarvis.memory.errors import ValidationError
+from jarvis.memory.store import MemoryStore
 from jarvis.runtime import app_session
 
 _API = "https://api.telegram.org"
@@ -76,6 +79,7 @@ def handle_update(
     update: dict[str, Any],
     *,
     allow_chat_id: str,
+    session=None,
 ) -> tuple[int | None, str | None]:
     message = update.get("message") or update.get("edited_message") or {}
     if not isinstance(message, dict):
@@ -87,28 +91,49 @@ def handle_update(
         return None, None
     if allow_chat_id and str(chat_id) != allow_chat_id:
         return int(chat_id), "This Jarvis bot is locked to another Telegram account."
+    if session is not None:
+        MemoryStore(session).upsert("PREFERENCES", "telegram_chat_id", str(chat_id))
     result = orch.handle(text.strip())
     return int(chat_id), result.reply
 
 
 def run_forever(settings: Settings) -> None:
-    client = TelegramClient(settings.telegram_bot_token)
+    client = None
+    if settings.telegram_bot_token:
+        client = TelegramClient(settings.telegram_bot_token)
+        print("Jarvis phone (Telegram). Leave this running. Ctrl+C to stop.")
+        print("Message the bot anytime. Confirmations: yes / no.")
+    else:
+        print("Jarvis watch (no Telegram token). I will still check reminders.")
+        print("Add JARVIS_TELEGRAM_BOT_TOKEN in .env to chat from your phone.")
+    if settings.voice_backend == "fake":
+        print("Voice calls are fake until JARVIS_VOICE_BACKEND=twilio and a number are set.")
     offset: int | None = None
-    print("Jarvis phone (Telegram). Leave this running. Type Ctrl+C to stop.")
-    print("Open the bot in Telegram and send a message. Confirmations: yes / no.")
     while True:
-        updates = client.get_updates(offset)
-        for update in updates:
-            update_id = update.get("update_id")
-            if isinstance(update_id, int):
-                offset = update_id + 1
-            with app_session() as (session, live):
-                orch = Orchestrator(session, build_provider(live))
-                chat_id, reply = handle_update(
-                    orch, update, allow_chat_id=live.telegram_chat_id
-                )
-            if chat_id is not None and reply:
-                client.send_message(chat_id, reply)
+        if client is not None:
+            updates = client.get_updates(offset, timeout=20)
+            for update in updates:
+                update_id = update.get("update_id")
+                if isinstance(update_id, int):
+                    offset = update_id + 1
+                with app_session() as (session, live):
+                    orch = Orchestrator(session, build_provider(live))
+                    chat_id, reply = handle_update(
+                        orch,
+                        update,
+                        allow_chat_id=live.telegram_chat_id,
+                        session=session,
+                    )
+                if chat_id is not None and reply:
+                    client.send_message(chat_id, reply)
+        with app_session() as (session, live):
+            alerts = collect_alerts(session, live)
+            if alerts:
+                deliver_alerts(session, alerts, settings=live, telegram=client)
+                for alert in alerts:
+                    print(alert.title + ":", alert.body[:200])
+        if client is None:
+            time.sleep(20)
 
 
 def _chunks(text: str) -> list[str]:

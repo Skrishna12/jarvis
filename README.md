@@ -71,9 +71,16 @@ finish **18:30**. Morning/evening briefing includes that plus traffic headlines
 for `JARVIS_COMMUTE_CITY` (or `commute city Hyderabad` in chat). This is news
 about jams/closures, not live Google Maps ETAs.
 
-**Phone:** create a Telegram bot with [@BotFather](https://t.me/BotFather), put
-`JARVIS_TELEGRAM_BOT_TOKEN` in `.env` only, then run `jarvis phone` and leave
-it running. Message the bot from your phone. Confirmations still use yes/no.
+**Phone chat:** create a Telegram bot with [@BotFather](https://t.me/BotFather),
+put `JARVIS_TELEGRAM_BOT_TOKEN` in `.env` only, then run `jarvis phone` and
+leave it running. Message the bot anytime. Confirmations still use yes/no.
+
+**Calls:** Jarvis can ring you and *speak* the update (Twilio). Put
+`JARVIS_VOICE_BACKEND=twilio`, SID, token, from-number, and `JARVIS_VOICE_TO`
+in `.env` only, then `JARVIS_ALERT_CALL=true`. Keep `jarvis phone` running.
+Due reminders trigger a call. Morning commute calls only if traffic looks
+bad, or if `JARVIS_ALERT_CALL_MORNING=true`. Until Twilio is set, calls stay
+**fake** (logged, not dialed).
 
 Morning briefing includes India + world headlines (plus business, tech, sports,
 science, health, entertainment) from public RSS. No extra API key. There is no

@@ -25,6 +25,7 @@ from jarvis.tools.email_tools import (
     EmailSendTool,
     EmailSummarizeTool,
 )
+from jarvis.tools.alert_tools import AlertPingTool
 from jarvis.tools.briefing_tools import BriefingEveningTool, BriefingMorningTool
 from jarvis.tools.calendar_tools import (
     CalendarCreateTool,
@@ -97,6 +98,7 @@ def default_registry() -> ToolRegistry:
         CommuteSetCityTool(),
         BriefingMorningTool(),
         BriefingEveningTool(),
+        AlertPingTool(),
     ):
         registry.register(tool)
     return registry
