@@ -31,14 +31,18 @@ jarvis reminder create "standup" --at 2026-10-25T09:00:00
 jarvis log
 ```
 
-Deletes need confirmation (level 2):
+Deletes (tasks, reminders, memories) need confirmation (level 2):
 
 ```bash
 jarvis task delete <id>
+jarvis memory delete USER_PROFILE preferred_name
 jarvis confirm list
 jarvis confirm approve <pending-id>
 # in chat, type yes or no
 ```
+
+Starting chat also prints any **due reminders** (then marks one-time items done
+and rolls recurring ones forward). There is no background notifier.
 
 ## Tests
 

@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from datetime import timedelta
+
 from jarvis.agents.orchestrator import Orchestrator
+from jarvis.core.clock import utc_now
 from jarvis.llm.fake import FakeProvider
+from jarvis.reminders.store import ReminderStore
 from jarvis.tasks.store import TaskStore
 
 
@@ -38,3 +42,13 @@ def test_delete_requires_yes(db_session) -> None:
     assert yes.outcome is not None
     assert yes.outcome.status == "ok"
     assert TaskStore(db_session).list() == []
+
+
+def test_due_briefing_reports_overdue_and_clears_one_time(db_session) -> None:
+    past = (utc_now() - timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%S")
+    ReminderStore(db_session).create("Call mom", trigger_at=past)
+    orch = Orchestrator(db_session, FakeProvider())
+    briefing = orch.due_briefing()
+    assert briefing is not None
+    assert "Call mom" in briefing
+    assert orch.due_briefing() is None

@@ -4,8 +4,8 @@ Read this file at the start of every session before changing code.
 
 ## Current milestone
 
-**M4–M7 complete** for the Phase 1–2 brief (permissions, tasks, reminders,
-orchestrator chat). Email/calendar/GitHub/voice/RAG remain out of scope.
+**Phase 1–2 + hardening** (complete for this brief). Chat due briefing and
+gated memory CLI are in. Email/calendar/GitHub/voice/RAG remain out of scope.
 
 ## What was built (M4–M7)
 
@@ -27,9 +27,12 @@ orchestrator chat). Email/calendar/GitHub/voice/RAG remain out of scope.
 
 ## Key decisions (M4–M7)
 
-- **Every agent write goes through `PermissionGate`** — agents cannot call
-  stores directly. Direct `jarvis memory` CLI remains an ungated admin path
-  for debugging.
+- **`jarvis memory` uses the permission gate** — set is level 1; delete is
+  level 2 and needs confirmation (same as chat/tools). There is no ungated
+  delete path in the CLI.
+- **Chat due briefing** — starting `jarvis chat` (including `--once`) runs
+  `reminder.due` and prints overdue items if any. One-time reminders are
+  marked fired; recurring ones roll forward. No background daemon.
 - **Heuristic planner + LLM JSON** — FakeProvider cannot emit tool JSON, so
   obvious phrases (`create a task …`) are parsed locally. A real model can
   still return `{"tool","payload"}`.
@@ -46,6 +49,8 @@ Ask before writing summaries into `memories.CONVERSATION_CONTEXT`
 (every N messages vs end of session vs something else).
 
 ## What's next
+
+Still not decided: conversation summarization into `CONVERSATION_CONTEXT`.
 
 Later phases from the long-term vision (email, calendar, GitHub, RAG, voice)
 only after an explicit green light and a brief update.
