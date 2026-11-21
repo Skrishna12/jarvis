@@ -19,6 +19,15 @@ jarvis db upgrade
 
 `.env` is gitignored. Defaults (`fake` LLM, email, GitHub) need no accounts.
 
+Groq (paste the key only in `.env`, never in chat):
+
+```
+JARVIS_LLM_PROVIDER=openai_compatible
+JARVIS_LLM_API_KEY=
+JARVIS_LLM_BASE_URL=https://api.groq.com/openai/v1
+JARVIS_LLM_MODEL=llama-3.3-70b-versatile
+```
+
 Real inbox (IMAP/SMTP) — **your** `.env` only, never in chat:
 
 ```
