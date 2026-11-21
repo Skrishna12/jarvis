@@ -37,6 +37,19 @@ class Orchestrator:
         self._gate = PermissionGate(session, default_registry())
         self._conversation = ConversationStore(session)
 
+    def due_briefing(self) -> str | None:
+        """Return due-reminder text, or None if nothing is due.
+
+        Fires matching reminders (disables one-time; rolls recurring forward)
+        the same way `reminder.due` does, so a chat session is enough to
+        notice them without a background daemon.
+        """
+        outcome = self._gate.invoke("reminder.due", {}, agent="reminder")
+        items = (outcome.data or {}).get("items") or []
+        if outcome.status != "ok" or not items:
+            return None
+        return outcome.message
+
     def handle(self, user_text: str) -> TurnResult:
         text = user_text.strip()
         if not text:

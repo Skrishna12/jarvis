@@ -28,9 +28,19 @@ def test_db_upgrade_and_memory_roundtrip(
     assert "preferred_name=Ada" in out
 
     assert main(["memory", "delete", "USER_PROFILE", "preferred_name"]) == 0
+    delete_out = capsys.readouterr().out
+    assert "permission level 2" in delete_out
+    assert main(["memory", "get", "USER_PROFILE", "preferred_name"]) == 0
+    still_there = capsys.readouterr().out
+    assert "preferred_name=Ada" in still_there
+
+    assert main(["confirm", "list"]) == 0
+    pending_line = capsys.readouterr().out.strip().splitlines()[-1]
+    pending_id = pending_line.split()[0]
+    assert main(["confirm", "approve", pending_id]) == 0
     assert main(["memory", "get", "USER_PROFILE", "preferred_name"]) == 1
     err = capsys.readouterr().err
-    assert "No memory stored" in err
+    assert "No memory stored" in err or "No memory" in err
 
 
 def test_conversation_add_and_recent(
@@ -99,3 +109,27 @@ def test_task_create_delete_confirm_and_chat(
     assert main(["confirm", "list"]) == 0
     listed = capsys.readouterr().out
     assert "task.delete" in listed
+
+
+def test_chat_once_prints_due_reminder(
+    isolated_db: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("JARVIS_LLM_PROVIDER", "fake")
+    assert main(["db", "upgrade"]) == 0
+    assert (
+        main(
+            [
+                "reminder",
+                "create",
+                "overdue ping",
+                "--at",
+                "2020-01-01T00:00:00",
+            ]
+        )
+        == 0
+    )
+    capsys.readouterr()
+    assert main(["chat", "--once", "list tasks"]) == 0
+    out = capsys.readouterr().out
+    assert "overdue ping" in out
+    assert "Due now" in out

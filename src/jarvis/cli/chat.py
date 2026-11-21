@@ -24,8 +24,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
 
 def cmd_chat(args: argparse.Namespace) -> int:
     if args.once:
+        _print_due_briefing()
         return _one_turn(args.once)
     print("Jarvis chat. Type quit to exit, yes/no to confirm pending actions.")
+    _print_due_briefing()
     try:
         while True:
             try:
@@ -41,6 +43,16 @@ def cmd_chat(args: argparse.Namespace) -> int:
     except DatabaseNotReadyError as exc:
         print(str(exc), file=sys.stderr)
         return 1
+
+
+def _print_due_briefing() -> None:
+    try:
+        with app_session() as (session, settings):
+            briefing = Orchestrator(session, build_provider(settings)).due_briefing()
+    except DatabaseNotReadyError:
+        return
+    if briefing:
+        print(briefing)
 
 
 def _one_turn(text: str) -> int:
