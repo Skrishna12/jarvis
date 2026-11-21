@@ -193,8 +193,11 @@ class OpenAICompatibleProvider(LLMProvider):
             )
         if status == 404:
             raise LlmProviderError(
-                "The LLM endpoint was not found (HTTP 404). "
-                "Check JARVIS_LLM_BASE_URL (it should usually end in /v1)."
+                "The LLM returned HTTP 404 (endpoint or model not found). "
+                f"JARVIS_LLM_BASE_URL={self._base_url} "
+                f"JARVIS_LLM_MODEL={self._model}. "
+                "For Groq, use https://api.groq.com/openai/v1 and a live model "
+                "such as openai/gpt-oss-120b (llama-3.3-70b-versatile was retired)."
             )
         raise LlmProviderError(
             f"The LLM request failed (HTTP {status}). "

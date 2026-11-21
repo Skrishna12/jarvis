@@ -25,7 +25,7 @@ Groq (paste the key only in `.env`, never in chat):
 JARVIS_LLM_PROVIDER=openai_compatible
 JARVIS_LLM_API_KEY=
 JARVIS_LLM_BASE_URL=https://api.groq.com/openai/v1
-JARVIS_LLM_MODEL=llama-3.3-70b-versatile
+JARVIS_LLM_MODEL=openai/gpt-oss-120b
 ```
 
 Real inbox (IMAP/SMTP) — **your** `.env` only, never in chat:

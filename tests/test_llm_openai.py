@@ -78,6 +78,16 @@ def test_http_401_does_not_include_api_key() -> None:
     assert _SECRET not in str(info.value)
 
 
+def test_http_404_mentions_model_not_key() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(404, json={"error": {"message": "model_not_found"}})
+
+    with pytest.raises(LlmProviderError, match="HTTP 404") as info:
+        _provider(handler).generate([ChatMessage(role="user", content="hi")])
+    assert "test-model" in str(info.value)
+    assert _SECRET not in str(info.value)
+
+
 def test_empty_completion_raises() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"choices": [{"message": {"content": "   "}}]})
