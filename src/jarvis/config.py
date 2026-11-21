@@ -20,6 +20,14 @@ _DEFAULT_DB_PATH = PROJECT_ROOT / "data" / "jarvis.db"
 _DEFAULT_PROVIDER = "fake"
 _DEFAULT_TIMEOUT = 60.0
 _DEFAULT_SUMMARY_EVERY = 10
+_DEFAULT_NEWS_NATIONAL = (
+    "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en"
+)
+_DEFAULT_NEWS_WORLD = (
+    "https://news.google.com/rss/headlines/section/topic/WORLD"
+    "?hl=en-IN&gl=IN&ceid=IN:en"
+)
+_DEFAULT_NEWS_PER_SECTION = 6
 
 
 @dataclass(frozen=True)
@@ -44,6 +52,9 @@ class Settings:
     email_smtp_port: int
     github_backend: str
     github_token: str
+    news_national_feed: str
+    news_world_feed: str
+    news_per_section: int
     database_path: Path
     env_file_loaded: bool
 
@@ -126,6 +137,16 @@ def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
             os.getenv("JARVIS_GITHUB_BACKEND", "fake").strip().lower() or "fake"
         ),
         github_token=os.getenv("JARVIS_GITHUB_TOKEN", "").strip(),
+        news_national_feed=(
+            os.getenv("JARVIS_NEWS_NATIONAL_FEED", "").strip() or _DEFAULT_NEWS_NATIONAL
+        ),
+        news_world_feed=(
+            os.getenv("JARVIS_NEWS_WORLD_FEED", "").strip() or _DEFAULT_NEWS_WORLD
+        ),
+        news_per_section=_parse_positive_int(
+            os.getenv("JARVIS_NEWS_PER_SECTION", "").strip(),
+            _DEFAULT_NEWS_PER_SECTION,
+        ),
         database_path=_resolve_database_path(
             os.getenv("JARVIS_DATABASE_PATH", "").strip()
         ),

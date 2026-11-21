@@ -50,6 +50,9 @@ def test_load_settings_without_env_file(monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.email_backend == "fake"
     assert settings.github_backend == "fake"
     assert settings.github_token == ""
+    assert "news.google.com" in settings.news_national_feed
+    assert "WORLD" in settings.news_world_feed
+    assert settings.news_per_section == 6
 
 
 def test_load_settings_reads_dotenv_file(tmp_path: Path) -> None:

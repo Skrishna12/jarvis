@@ -55,6 +55,8 @@ def plan_from_text(text: str) -> Plan | None:
     stripped = text.strip()
     lower = stripped.lower()
 
+    if lower in {"news", "headlines", "daily news", "today's news", "todays news"}:
+        return Plan("news.digest", {})
     if lower in {"morning briefing", "brief me", "daily briefing", "morning brief"}:
         return Plan("briefing.morning", {})
     if lower in {"evening briefing", "evening wrap", "wrap up"}:

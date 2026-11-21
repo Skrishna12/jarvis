@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from jarvis.calendar.store import CalendarStore
 from jarvis.email.store import EmailStore
+from jarvis.news.feeds import fetch_digest, format_digest
 from jarvis.notify.store import NotificationStore
 from jarvis.reminders.store import ReminderStore
 from jarvis.security.levels import PermissionLevel
@@ -16,7 +17,9 @@ from jarvis.tools.serialize import record_data
 
 class BriefingMorningTool(Tool):
     name = "briefing.morning"
-    description = "Today's events, due reminders, open high tasks, unread mail and notices."
+    description = (
+        "Today's events, due reminders, open high tasks, unread mail, and daily news."
+    )
     agent = "briefing"
     level = PermissionLevel.SAFE
 
@@ -45,6 +48,8 @@ class BriefingMorningTool(Tool):
             sections.append(f"Notifications: {len(notices)} unread")
         if mail:
             sections.append("Recent mail: " + ", ".join(m.subject for m in mail[:3]))
+        news = fetch_digest()
+        sections.append(format_digest(news))
         return ToolResult(
             True,
             "\n".join(sections),
@@ -53,6 +58,14 @@ class BriefingMorningTool(Tool):
                 "events": [record_data(e) for e in events],
                 "tasks": [record_data(t) for t in tasks],
                 "notifications": [record_data(n) for n in notices],
+                "news": [
+                    {
+                        "name": s.name,
+                        "error": s.error,
+                        "headlines": [h.title for h in s.headlines],
+                    }
+                    for s in news
+                ],
             },
         )
 

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from jarvis.db.engine import make_engine
 from jarvis.db.models import Base
 from jarvis.email.fake import reset_fake_mailbox
+from jarvis.news.feeds import Headline, NewsSection
 
 
 @pytest.fixture(autouse=True)
@@ -18,6 +19,27 @@ def _clean_fake_mailbox() -> Iterator[None]:
     reset_fake_mailbox()
     yield
     reset_fake_mailbox()
+
+
+@pytest.fixture(autouse=True)
+def _stub_news_digest(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests should not hit live Google News."""
+
+    def fake_digest(**_kwargs) -> list[NewsSection]:
+        return [
+            NewsSection(
+                "National",
+                [Headline("India story", "https://example.test/in", "National")],
+            ),
+            NewsSection(
+                "International",
+                [Headline("World story", "https://example.test/w", "International")],
+            ),
+        ]
+
+    monkeypatch.setattr("jarvis.news.feeds.fetch_digest", fake_digest)
+    monkeypatch.setattr("jarvis.tools.briefing_tools.fetch_digest", fake_digest)
+    monkeypatch.setattr("jarvis.tools.news_tools.fetch_digest", fake_digest)
 
 
 @pytest.fixture

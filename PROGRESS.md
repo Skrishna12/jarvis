@@ -15,7 +15,8 @@ search, in-app notifications, morning/evening briefing.
   `JARVIS_GITHUB_BACKEND=fake`. Live API needs a token in local `.env`.
 - Local document ingest + keyword search (markdown/text/code, no embeddings).
 - Unread `notifications` plus `briefing.morning` / `briefing.evening`.
-- CLI: `project`, `calendar`, `github`, `docs`, `notify`, `briefing`.
+- Daily news (India + world + topic RSS) in `news.digest` and morning briefing.
+- CLI: `project`, `calendar`, `github`, `docs`, `notify`, `news`, `briefing`.
 
 ## Earlier
 

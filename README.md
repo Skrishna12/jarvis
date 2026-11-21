@@ -1,7 +1,7 @@
 # Jarvis
 
 Personal CLI assistant: chat orchestrator, tasks, reminders, memory, email,
-calendar, projects, local doc search, and **read-only GitHub**.
+calendar, projects, local doc search, daily news, and **read-only GitHub**.
 
 Email send always waits for confirmation. GitHub tools never write.
 
@@ -47,6 +47,7 @@ JARVIS_GITHUB_TOKEN=your-token-not-in-chat
 
 ```bash
 jarvis chat
+jarvis news
 jarvis briefing morning
 jarvis calendar today
 jarvis calendar create "Standup" --start 2026-11-21T09:00:00
@@ -58,8 +59,13 @@ jarvis email fetch
 jarvis email send <id>          # confirmation required
 ```
 
-Chat phrases: `morning briefing`, `calendar today`, `list projects`,
+Chat phrases: `morning briefing`, `news`, `calendar today`, `list projects`,
 `check inbox`, `list tasks`.
+
+Morning briefing includes India + world headlines (plus business, tech, sports,
+science, health, entertainment) from public RSS. No extra API key. There is no
+background daemon yet — run `jarvis briefing morning` each morning, or open
+`jarvis chat` (news prints at session start).
 
 ## Tests
 

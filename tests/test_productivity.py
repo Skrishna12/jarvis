@@ -71,3 +71,5 @@ def test_morning_briefing_chat(db_session) -> None:
     assert result.intent == "BRIEFING"
     assert "Dentist" in result.reply
     assert "Pay rent" in result.reply
+    assert "Daily news" in result.reply
+    assert "India story" in result.reply

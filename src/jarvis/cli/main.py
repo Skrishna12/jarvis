@@ -18,6 +18,7 @@ from jarvis.cli import github_cmd
 from jarvis.cli import llm as llm_cmd
 from jarvis.cli import logs as logs_cmd
 from jarvis.cli import memory as memory_cmd
+from jarvis.cli import news_cmd
 from jarvis.cli import notify_cmd
 from jarvis.cli import project_cmd
 from jarvis.cli import reminder_cmd
@@ -52,6 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
     github_cmd.register(subparsers)
     docs_cmd.register(subparsers)
     notify_cmd.register(subparsers)
+    news_cmd.register(subparsers)
     briefing_cmd.register(subparsers)
     confirm_cmd.register(subparsers)
     logs_cmd.register(subparsers)

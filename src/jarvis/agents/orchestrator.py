@@ -27,6 +27,7 @@ _INTENTS = (
     "DOCS",
     "NOTIFY",
     "BRIEFING",
+    "NEWS",
     "CONFIRM",
 )
 _YES = {"yes", "y", "ok", "okay", "approve", "confirm"}
@@ -117,6 +118,8 @@ class Orchestrator:
 
     def _intent(self, text: str) -> str:
         lower = text.lower()
+        if any(word in lower for word in ("news", "headline", "headlines")):
+            return "NEWS"
         if any(word in lower for word in ("briefing", "brief me", "wrap up")):
             return "BRIEFING"
         if any(word in lower for word in ("calendar", "schedule", "meeting", "event")):
@@ -170,7 +173,7 @@ class Orchestrator:
         system = (
             "You are Jarvis, a personal CLI assistant. Be brief. "
             "You can manage tasks, reminders, email, calendar, projects, "
-            "local docs, and read-only GitHub when asked. "
+            "local docs, read-only GitHub, and daily news headlines when asked. "
             "Never claim you sent email. Drafts are not sent until the user confirms. "
             "Never claim you pushed to GitHub — GitHub tools are read-only."
         )
@@ -211,6 +214,8 @@ class Orchestrator:
             return "notify"
         if tool_name.startswith("briefing."):
             return "briefing"
+        if tool_name.startswith("news."):
+            return "news"
         return "orchestrator"
 
     def _format_outcome(self, outcome: GateOutcome) -> str:
@@ -232,7 +237,7 @@ def _planner_prompt(intent: str) -> str:
         "email.send, project.list, project.create, project.update, calendar.today, "
         "calendar.list, calendar.create, calendar.delete, github.repos, github.issues, "
         "github.pulls, docs.ingest, docs.search, notify.list, notify.read, "
-        "briefing.morning, briefing.evening. "
+        "briefing.morning, briefing.evening, news.digest. "
         "Never send email without a draft; send is confirmation-only. "
         "GitHub tools are read-only. calendar.create payload: title, start_at ISO. "
         "task.create payload: title, optional description, priority, due_at, project_id. "
