@@ -4,37 +4,38 @@ Read this file at the start of every session before changing code.
 
 ## Current milestone
 
-**Email agent** (IMAP/SMTP or fake backend). Send is always permission level 2.
+**Productivity pack** — calendar, projects, GitHub (read-only), local doc
+search, in-app notifications, morning/evening briefing.
 
-## What was built (email)
+## What was built (this pack)
 
-- Local `emails` cache (SQLite) plus `email.fetch` from a mailbox adapter.
-- Default `JARVIS_EMAIL_BACKEND=fake` (in-memory inbox, no network).
-- `imap` backend: IMAP fetch + SMTP send; credentials only in `.env`.
-- Tools: fetch, list, get, search, classify, summarize, draft, send.
-- Categories: Job, Work, Interview, Education, Finance, Bills, Orders,
-  Personal, Notifications, Other. Urgency: low / normal / urgent.
-- Heuristic classify + ISO-date deadline hints (e.g. interviews).
-- **Never sends without confirmation.** Draft is level 1; send is level 2.
+- `projects` table; tasks may set `project_id`.
+- Local `calendar_events` with overlap warnings + a notification.
+- `github.repos` / `github.issues` / `github.pulls` — **read-only**. Default
+  `JARVIS_GITHUB_BACKEND=fake`. Live API needs a token in local `.env`.
+- Local document ingest + keyword search (markdown/text/code, no embeddings).
+- Unread `notifications` plus `briefing.morning` / `briefing.evening`.
+- CLI: `project`, `calendar`, `github`, `docs`, `notify`, `briefing`.
 
-## Earlier (Phase 1–2)
+## Earlier
 
 Orchestrator, tasks, reminders, memory, permissions, action log, rolling
-`CONVERSATION_CONTEXT` summaries, CLI chat.
+`CONVERSATION_CONTEXT` summaries, CLI chat, email (IMAP/SMTP or fake; send
+always level 2).
 
-## Key decisions (email)
+## Key decisions
 
-- **IMAP/SMTP instead of Gmail OAuth for this slice** — OAuth needs a Google
-  Cloud app and a redirect URL. An app password in `.env` is enough for a
-  personal CLI. OAuth can replace the transport later without changing tools.
-- **Fake backend by default** — tests and first-run never touch a real inbox.
-- **Reply goes to `From:`** with subject `Re: …` using the saved draft only.
+- **GitHub is read-only on purpose.** No comments, merges, or pushes.
+- **Docs search is keyword, not embeddings.** Good enough for a personal CLI
+  without a vector DB.
+- **Calendar is local SQLite**, not Google Calendar OAuth.
+- Voice, mobile, web dashboard, and computer control stay out of scope.
 
 ## Secrets
 
-Email password lives only in local `.env`. Status prints address **set/not
-set**, never the password. Action logs already redact `password`.
+LLM key, email password, and GitHub token live only in local `.env`. Status
+prints **set/not set**. Action logs redact `token` / `password` / `api_key`.
 
-## What's next
+## What's next (only if asked)
 
-Calendar, then GitHub/projects, RAG, voice — only after you green-light them.
+Voice, mobile, web dashboard, computer control, Gmail OAuth, real embeddings.

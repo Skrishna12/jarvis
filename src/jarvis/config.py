@@ -42,6 +42,8 @@ class Settings:
     email_imap_port: int
     email_smtp_host: str
     email_smtp_port: int
+    github_backend: str
+    github_token: str
     database_path: Path
     env_file_loaded: bool
 
@@ -120,6 +122,10 @@ def load_settings(*, env_file: Path | None = _ENV_PATH) -> Settings:
         email_smtp_port=_parse_positive_int(
             os.getenv("JARVIS_EMAIL_SMTP_PORT", "").strip(), 587
         ),
+        github_backend=(
+            os.getenv("JARVIS_GITHUB_BACKEND", "fake").strip().lower() or "fake"
+        ),
+        github_token=os.getenv("JARVIS_GITHUB_TOKEN", "").strip(),
         database_path=_resolve_database_path(
             os.getenv("JARVIS_DATABASE_PATH", "").strip()
         ),

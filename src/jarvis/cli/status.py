@@ -19,13 +19,16 @@ def print_status() -> None:
         db_state = "missing — run: jarvis db upgrade"
 
     email_addr = "set" if settings.email_address else "not set"
-    print(f"Jarvis {__version__} — chat, tasks, reminders, email.")
+    print(f"Jarvis {__version__} — chat, tasks, calendar, email, GitHub (read-only).")
     print(f"  .env file loaded: {env_state}")
     print(f"  JARVIS_LLM_PROVIDER: {settings.llm_provider}")
     print(f"  JARVIS_LLM_API_KEY: {key_state}")
     print(f"  JARVIS_LLM_MODEL: {settings.llm_model}")
     print(f"  JARVIS_EMAIL_BACKEND: {settings.email_backend}")
     print(f"  JARVIS_EMAIL_ADDRESS: {email_addr}")
+    token_state = "set" if settings.github_token else "not set"
+    print(f"  JARVIS_GITHUB_BACKEND: {settings.github_backend}")
+    print(f"  JARVIS_GITHUB_TOKEN: {token_state}")
     print(f"  database: {db_path} ({db_state})")
     print("  chat: jarvis chat   (type yes/no to confirm level-2 actions)")
     print("  email send always asks first")

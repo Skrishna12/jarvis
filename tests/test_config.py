@@ -20,6 +20,8 @@ _ENV_KEYS = (
     "JARVIS_EMAIL_BACKEND",
     "JARVIS_EMAIL_ADDRESS",
     "JARVIS_EMAIL_PASSWORD",
+    "JARVIS_GITHUB_BACKEND",
+    "JARVIS_GITHUB_TOKEN",
 )
 
 
@@ -46,6 +48,8 @@ def test_load_settings_without_env_file(monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.llm_timeout_seconds == 60.0
     assert settings.summary_every_messages == 10
     assert settings.email_backend == "fake"
+    assert settings.github_backend == "fake"
+    assert settings.github_token == ""
 
 
 def test_load_settings_reads_dotenv_file(tmp_path: Path) -> None:

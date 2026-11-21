@@ -6,14 +6,20 @@ import argparse
 import sys
 
 from jarvis import __version__
+from jarvis.cli import briefing_cmd
+from jarvis.cli import calendar_cmd
 from jarvis.cli import chat as chat_cmd
 from jarvis.cli import confirm as confirm_cmd
 from jarvis.cli import conversation as conversation_cmd
 from jarvis.cli import database as database_cmd
+from jarvis.cli import docs_cmd
 from jarvis.cli import email_cmd
+from jarvis.cli import github_cmd
 from jarvis.cli import llm as llm_cmd
 from jarvis.cli import logs as logs_cmd
 from jarvis.cli import memory as memory_cmd
+from jarvis.cli import notify_cmd
+from jarvis.cli import project_cmd
 from jarvis.cli import reminder_cmd
 from jarvis.cli import task_cmd
 from jarvis.cli import tools_cmd
@@ -25,7 +31,7 @@ from jarvis.security.errors import SecurityError
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="jarvis",
-        description="Personal CLI assistant (tasks, reminders, email).",
+        description="Personal CLI assistant (tasks, calendar, email, GitHub read-only).",
     )
     parser.add_argument(
         "--version",
@@ -41,6 +47,12 @@ def build_parser() -> argparse.ArgumentParser:
     task_cmd.register(subparsers)
     reminder_cmd.register(subparsers)
     email_cmd.register(subparsers)
+    project_cmd.register(subparsers)
+    calendar_cmd.register(subparsers)
+    github_cmd.register(subparsers)
+    docs_cmd.register(subparsers)
+    notify_cmd.register(subparsers)
+    briefing_cmd.register(subparsers)
     confirm_cmd.register(subparsers)
     logs_cmd.register(subparsers)
     chat_cmd.register(subparsers)

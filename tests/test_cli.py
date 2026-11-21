@@ -75,6 +75,9 @@ def test_help_lists_new_commands(capsys: pytest.CaptureFixture[str]) -> None:
     assert "chat" in out
     assert "task" in out
     assert "email" in out
+    assert "calendar" in out
+    assert "github" in out
+    assert "briefing" in out
     assert "confirm" in out
 
 
@@ -150,3 +153,19 @@ def test_email_fetch_draft_and_confirm_send(
     assert "Interview" in listed
     assert main(["chat", "--once", "check inbox"]) == 0
     assert sent_messages() == []
+
+
+def test_productivity_cli_roundtrip(
+    isolated_db: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("JARVIS_LLM_PROVIDER", "fake")
+    monkeypatch.setenv("JARVIS_GITHUB_BACKEND", "fake")
+    assert main(["db", "upgrade"]) == 0
+    assert main(["project", "create", "Launch"]) == 0
+    assert main(["calendar", "create", "Standup", "--start", "2026-11-21T09:00:00"]) == 0
+    assert main(["github", "repos"]) == 0
+    assert main(["briefing", "morning"]) == 0
+    assert main(["chat", "--once", "list projects"]) == 0
+    out = capsys.readouterr().out
+    assert "Launch" in out
+    assert "local/jarvis" in out
