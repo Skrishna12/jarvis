@@ -1,8 +1,4 @@
-"""Append-only store for conversation turns.
-
-Summarizing these rows into memories.CONVERSATION_CONTEXT is not implemented
-here. That policy is decided at Milestone 7 with an explicit choice.
-"""
+"""Append-only store for conversation turns."""
 
 from __future__ import annotations
 
@@ -11,7 +7,7 @@ from datetime import datetime, timezone
 from enum import StrEnum
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from jarvis.db.models import ConversationMessage
@@ -76,6 +72,12 @@ class ConversationStore:
             content=row.content,
             created_at=row.created_at,
         )
+
+    def count(self) -> int:
+        value = self._session.scalar(
+            select(func.count()).select_from(ConversationMessage)
+        )
+        return int(value or 0)
 
     def recent(self, limit: int = 20) -> list[ConversationRecord]:
         if limit < 1:

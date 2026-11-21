@@ -3,11 +3,13 @@
 from jarvis.memory.categories import MemoryCategory
 from jarvis.memory.conversation import ConversationStore, MessageRole
 from jarvis.memory.store import MemoryRecord, MemoryStore
+from jarvis.memory.summarize import ConversationSummarizer
 
 __all__ = [
     "ConversationStore",
     "MemoryCategory",
     "MemoryRecord",
     "MemoryStore",
+    "ConversationSummarizer",
     "MessageRole",
 ]

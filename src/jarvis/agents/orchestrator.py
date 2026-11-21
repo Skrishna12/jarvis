@@ -1,8 +1,4 @@
-"""Route a user turn to task/reminder/memory tools, then reply.
-
-Conversation rows are persisted. We do **not** write CONVERSATION_CONTEXT
-summaries — that policy is still unapproved.
-"""
+"""Route a user turn to task/reminder/memory tools, then reply."""
 
 from __future__ import annotations
 
@@ -15,6 +11,7 @@ from jarvis.llm.base import LLMProvider
 from jarvis.llm.errors import LlmError
 from jarvis.llm.types import ChatMessage
 from jarvis.memory.conversation import ConversationStore
+from jarvis.memory.summarize import ConversationSummarizer
 from jarvis.security.gate import GateOutcome, PermissionGate
 from jarvis.tools.catalog import default_registry
 
@@ -31,11 +28,20 @@ class TurnResult:
 
 
 class Orchestrator:
-    def __init__(self, session: Session, provider: LLMProvider) -> None:
+    def __init__(
+        self,
+        session: Session,
+        provider: LLMProvider,
+        *,
+        summary_every: int | None = None,
+    ) -> None:
         self._session = session
         self._provider = provider
         self._gate = PermissionGate(session, default_registry())
         self._conversation = ConversationStore(session)
+        self._summarizer = ConversationSummarizer(
+            session, provider, every=summary_every
+        )
 
     def due_briefing(self) -> str | None:
         """Return due-reminder text, or None if nothing is due.
@@ -59,19 +65,16 @@ class Orchestrator:
 
         if text.lower() in _YES or text.lower() in _NO:
             result = self._handle_confirm(text.lower() in _YES)
-            self._conversation.add("assistant", result.reply)
-            return result
+            return self._finish(result)
 
         intent = self._intent(text)
         if intent == "CONFIRM":
             result = self._handle_confirm(True)
-            self._conversation.add("assistant", result.reply)
-            return result
+            return self._finish(result)
 
         if intent == "CHAT":
             reply = self._chat_reply(text)
-            self._conversation.add("assistant", reply)
-            return TurnResult(reply, "CHAT")
+            return self._finish(TurnResult(reply, "CHAT"))
 
         plan = self._plan(text, intent)
         if plan is None or plan.tool is None:
@@ -81,13 +84,16 @@ class Orchestrator:
                 "Try 'list tasks', 'create a task buy milk', or "
                 "'remind me standup 2026-10-25T09:00:00'."
             )
-            self._conversation.add("assistant", reply)
-            return TurnResult(reply, intent)
+            return self._finish(TurnResult(reply, intent))
 
         outcome = self._gate.invoke(plan.tool, plan.payload, agent=self._agent_for(plan.tool))
         reply = self._format_outcome(outcome)
-        self._conversation.add("assistant", reply)
-        return TurnResult(reply, intent, outcome)
+        return self._finish(TurnResult(reply, intent, outcome))
+
+    def _finish(self, result: TurnResult) -> TurnResult:
+        self._conversation.add("assistant", result.reply)
+        self._summarizer.maybe_run()
+        return result
 
     def _handle_confirm(self, approve: bool) -> TurnResult:
         pending_id = self._gate.latest_pending_id()
@@ -133,15 +139,16 @@ class Orchestrator:
 
     def _chat_reply(self, text: str) -> str:
         history = self._conversation.recent(limit=12)
+        rolling = self._summarizer.latest()
+        system = (
+            "You are Jarvis, a personal CLI assistant. Be brief. "
+            "You can manage tasks and reminders when asked. "
+            "Do not claim you sent email or changed files."
+        )
+        if rolling:
+            system += f"\nLong-term conversation notes:\n{rolling}"
         messages = [
-            ChatMessage(
-                role="system",
-                content=(
-                    "You are Jarvis, a personal CLI assistant. Be brief. "
-                    "You can manage tasks and reminders when asked. "
-                    "Do not claim you sent email or changed files."
-                ),
-            )
+            ChatMessage(role="system", content=system)
         ]
         for row in history[:-1]:
             messages.append(ChatMessage(role=row.role.value, content=row.content))
