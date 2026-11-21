@@ -74,7 +74,8 @@ for `JARVIS_COMMUTE_CITY` (or `commute city Hyderabad` in chat). This is news
 about jams/closures, not live Google Maps ETAs.
 
 **Alexa (home Echo):** the speaker is always on, but Jarvis still runs on the
-laptop. `jarvis alexa`, then expose it with HTTPS (ngrok). In the Alexa
+laptop. `jarvis alexa`, then in another terminal `bash scripts/alexa-tunnel.sh`
+(no ngrok account). Copy the `https://….trycloudflare.com` URL. In the Alexa
 developer console create a custom skill, invocation name `jarvis`, paste
 `skills/alexa/interaction-model.json`, set the endpoint to the ngrok https
 URL. Say: “Alexa, open Jarvis” or “Alexa, ask Jarvis traffic”. The Echo
